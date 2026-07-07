@@ -1,0 +1,27 @@
+{
+  "collections": [
+    {
+      "name": "rounds",
+      "fields": [
+        { "name": "name", "type": "string" },
+        { "name": "createdAt", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "workers",
+      "fields": [
+        { "name": "roundId", "type": "string" },
+        { "name": "rowIndex", "type": "number" },
+        { "name": "checker", "type": "string" },
+        { "name": "company", "type": "string" },
+        { "name": "name", "type": "string" },
+        { "name": "dob", "type": "string" },
+        { "name": "targetCheck", "type": "string" },
+        { "name": "status", "type": "string" },
+        { "name": "remark", "type": "string" },
+        { "name": "lastChecker", "type": "string" },
+        { "name": "checkDate", "type": "string" }
+      ]
+    }
+  ]
+}
