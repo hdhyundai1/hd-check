@@ -8,7 +8,7 @@ interface WorkerRowProps {
   item: Worker;
   currentTab: 'all' | 'un' | 'ok';
   showCompany: boolean;
-  onSave: (rowIndex: number, status: string, remark: string) => Promise<void> | void;
+  onSave: (rowIndexOrId: number | string, status: string, remark: string) => Promise<void> | void;
   onOpenModal: (worker: Worker) => void;
 }
 
@@ -56,7 +56,7 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
         {!item.status ? (
           <>
             <button 
-              onClick={() => onSave(item.rowIndex, '확인', '')} 
+              onClick={() => onSave(item.id || item.rowIndex, '확인', '')} 
               className="bg-[#007AFF] text-white font-semibold text-[13px] px-4 py-1.5 rounded-full active:opacity-70 transition-all shrink-0"
             >
               정상출근

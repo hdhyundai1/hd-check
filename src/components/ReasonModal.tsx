@@ -6,7 +6,7 @@ import { Worker } from '../types';
 interface ReasonModalProps {
   worker: Worker | null;
   onClose: () => void;
-  onSave: (rowIndex: number, status: string, remark: string) => Promise<void> | void;
+  onSave: (rowIndexOrId: number | string, status: string, remark: string) => Promise<void> | void;
 }
 
 const REASONS = [
@@ -87,7 +87,7 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
       }
     }
 
-    onSave(worker.rowIndex, '부재중 확인', finalReason);
+    onSave(worker.id || worker.rowIndex, '부재중 확인', finalReason);
     onClose();
   };
 
@@ -194,15 +194,26 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
           </button>
           
           {worker.status && (
-            <button 
-              onClick={() => {
-                onSave(worker.rowIndex, '확인', '');
-                onClose();
-              }} 
-              className="w-full py-4 rounded-xl font-semibold text-[#007AFF] bg-white border border-[#007AFF] hover:bg-[#007AFF]/10 active:scale-95 transition text-sm"
-            >
-              정상출근으로 변경
-            </button>
+            <div className="flex gap-2 w-full">
+              <button 
+                onClick={() => {
+                  onSave(worker.id || worker.rowIndex, '확인', '');
+                  onClose();
+                }} 
+                className="flex-1 py-4 rounded-xl font-semibold text-[#007AFF] bg-white border border-[#007AFF] hover:bg-[#007AFF]/10 active:scale-95 transition text-sm"
+              >
+                정상출근으로 변경
+              </button>
+              <button 
+                onClick={() => {
+                  onSave(worker.id || worker.rowIndex, '', '');
+                  onClose();
+                }} 
+                className="flex-1 py-4 rounded-xl font-semibold text-[#FF3B30] bg-white border border-[#FF3B30] hover:bg-[#FF3B30]/10 active:scale-95 transition text-sm"
+              >
+                확인 Reset
+              </button>
+            </div>
           )}
         </div>
       </div>

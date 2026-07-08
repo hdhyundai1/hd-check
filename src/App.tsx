@@ -139,10 +139,12 @@ export default function App() {
     }
   };
 
-  const handleSave = async (rowIndex: number, status: string, remark = '') => {
+  const handleSave = async (rowIndexOrId: number | string, status: string, remark = '') => {
     if (!userInfo) return;
     
-    const target = (userInfo.list || []).find(d => d.rowIndex === rowIndex);
+    const target = (userInfo.list || []).find(d => 
+      String(d.rowIndex) === String(rowIndexOrId) || d.id === rowIndexOrId
+    );
     if (!target) return;
     
     // Optimistic update
@@ -151,7 +153,7 @@ export default function App() {
       return {
         ...prev,
         list: (prev.list || []).map(item => 
-          item.rowIndex === rowIndex 
+          (String(item.rowIndex) === String(rowIndexOrId) || item.id === rowIndexOrId)
             ? { ...item, status, remark, lastChecker: prev.name }
             : item
         )
@@ -169,7 +171,7 @@ export default function App() {
         return {
           ...prev,
           list: (prev.list || []).map(item => 
-            item.rowIndex === rowIndex 
+            (String(item.rowIndex) === String(rowIndexOrId) || item.id === rowIndexOrId)
               ? { ...item, checkDate: localISOTime }
               : item
           )
@@ -177,7 +179,7 @@ export default function App() {
       });
 
       // Fire and forget (Firebase will queue this in IndexedDB if offline)
-      saveStatusApi(target.id, status, remark, userInfo.name, localISOTime).catch(e => {
+      saveStatusApi(target.id!, status, remark, userInfo.name, localISOTime).catch(e => {
         console.error('Failed to save', e);
       });
       
@@ -189,8 +191,9 @@ export default function App() {
   const filteredList = useMemo(() => {
     if (!userInfo) return [];
     let compData = userInfo.list || [];
-    if (userInfo.role === 'USER') {
-      compData = compData.filter(d => d.checker === userInfo.name);
+    const roleUpper = String(userInfo.role).toUpperCase();
+    if (roleUpper === 'USER') {
+      compData = compData.filter(d => (d.checker || '').trim() === (userInfo.name || '').trim());
     }
     if (currentComp !== 'ALL') {
       compData = compData.filter(d => d.company === currentComp);
@@ -215,8 +218,9 @@ export default function App() {
   const stats = useMemo(() => {
     if (!userInfo) return { total: 0, ok: 0, no: 0 };
     let compData = userInfo.list || [];
-    if (userInfo.role === 'USER') {
-      compData = compData.filter(d => d.checker === userInfo.name);
+    const roleUpper = String(userInfo.role).toUpperCase();
+    if (roleUpper === 'USER') {
+      compData = compData.filter(d => (d.checker || '').trim() === (userInfo.name || '').trim());
     }
     if (currentComp !== 'ALL') {
       compData = compData.filter(d => d.company === currentComp);
@@ -231,7 +235,12 @@ export default function App() {
 
   const companies = useMemo(() => {
     if (!userInfo || !userInfo.list) return [];
-    return [...new Set((userInfo.list || []).map(d => d.company || ''))].filter(Boolean).sort();
+    let list = userInfo.list || [];
+    const roleUpper = String(userInfo.role).toUpperCase();
+    if (roleUpper === 'USER') {
+      list = list.filter(d => (d.checker || '').trim() === (userInfo.name || '').trim());
+    }
+    return [...new Set(list.map(d => d.company || ''))].filter(Boolean).sort();
   }, [userInfo]);
 
   if (!userInfo) {
@@ -253,7 +262,7 @@ export default function App() {
             <span className="text-[10px] md:text-sm font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">on {userInfo.name}님</span>
           </div>
           <div className="flex gap-1.5 md:gap-2">
-                        {userInfo.role === 'ADMIN' && (
+            {String(userInfo.role).toUpperCase() === 'ADMIN' && (
               <button 
                 onClick={() => setIsDashboardOpen(true)} 
                 className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-indigo-50 flex items-center justify-center hover:bg-indigo-100 transition-colors"
@@ -262,7 +271,7 @@ export default function App() {
                 <BarChart3 className="w-4 h-4 md:w-5 md:h-5 text-indigo-600" />
               </button>
             )}
-            {userInfo.role === 'ADMIN' && (
+            {String(userInfo.role).toUpperCase() === 'ADMIN' && (
               <button 
                 onClick={() => setIsSettingsOpen(true)} 
                 className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"

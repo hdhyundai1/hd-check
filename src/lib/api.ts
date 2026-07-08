@@ -25,7 +25,7 @@ export async function loginApi(name: string, pw: string) {
     
     if (!snap.empty) {
       const userDoc = snap.docs[0].data();
-      return { status: 'success', role: userDoc.role || 'USER', name: userDoc.name };
+      return { status: 'success', role: (userDoc.role || 'USER').toUpperCase(), name: userDoc.name };
     }
 
     // 신규 사용자 자동 등록
@@ -112,12 +112,12 @@ export async function uploadExcelApi(roundId: string, rows: any[], onProgress?: 
       const newDoc = doc(collection(db, 'workers'));
       batch.set(newDoc, {
         roundId: roundId || '',
-        rowIndex: r[0] ?? 0,
-        checker: String(r[1] ?? ''),
-        company: String(r[2] ?? ''),
-        name: String(r[3] ?? ''),
-        dob: String(r[4] ?? ''),
-        targetCheck: String(r[5] ?? ''),
+        rowIndex: r[0] !== undefined && r[0] !== null ? Number(r[0]) : 0,
+        checker: String(r[1] ?? '').trim(),
+        company: String(r[2] ?? '').trim(),
+        name: String(r[3] ?? '').trim(),
+        dob: String(r[4] ?? '').trim(),
+        targetCheck: String(r[5] ?? '').trim(),
         status: '',
         remark: '',
         lastChecker: '',
@@ -204,13 +204,9 @@ export function subscribeWorkersApi(roundId: string, callback: (list: Worker[]) 
     
     // sorting same as fetchWorkersApi
     list.sort((a, b) => {
-      const cA = a.company || '';
-      const cB = b.company || '';
-      if (cA !== cB) return cA.localeCompare(cB);
-      
-      const nA = a.name || '';
-      const nB = b.name || '';
-      return nA.localeCompare(nB);
+      const rA = Number(a.rowIndex) || 0;
+      const rB = Number(b.rowIndex) || 0;
+      return rA - rB;
     });
     
     // Debounce to stabilize UI with concurrent users
