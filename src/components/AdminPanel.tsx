@@ -14,6 +14,8 @@ interface AdminPanelProps {
 export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRoundId }: AdminPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgressMsg, setUploadProgressMsg] = useState('');
+  const [uploadProgressPercent, setUploadProgressPercent] = useState(0);
   const [deleteStep, setDeleteStep] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [uploadStep, setUploadStep] = useState(0); // 0=none, 1=confirm, 2=success, 3=error
@@ -169,7 +171,12 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
   const confirmUpload = async () => {
     try {
       setIsUploading(true);
-      await uploadExcelApi(roundId, uploadRows);
+      setUploadProgressMsg('준비 중...');
+      setUploadProgressPercent(0);
+      await uploadExcelApi(roundId, uploadRows, (msg, percent) => {
+        setUploadProgressMsg(msg);
+        setUploadProgressPercent(percent);
+      });
       setUploadMessage(`성공적으로 ${uploadRows.length}명의 명단이 업로드되었습니다.`);
       setUploadStep(2); // success
       onUploadSuccess();
@@ -179,6 +186,8 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
       setUploadStep(3); // error
     } finally {
       setIsUploading(false);
+      setUploadProgressMsg('');
+      setUploadProgressPercent(0);
     }
   };
 
@@ -422,6 +431,17 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
                   <span className="text-blue-600">신규 {uploadRows.length}명</span>으로 덮어씁니다.<br/>
                   진행하시겠습니까?
                 </p>
+                {isUploading && (
+                  <div className="mb-6">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span>{uploadProgressMsg}</span>
+                      <span>{Math.round(uploadProgressPercent)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${uploadProgressPercent}%` }}></div>
+                    </div>
+                  </div>
+                )}
                 <div className="flex gap-2 flex-row-reverse">
                   <button 
                     onClick={() => setUploadStep(0)}

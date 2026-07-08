@@ -9,6 +9,7 @@ import DashboardModal from './components/DashboardModal';
 import WorkerRow from './components/WorkerRow';
 import ReasonModal from './components/ReasonModal';
 import { AnimatePresence } from 'motion/react';
+import { Virtuoso } from 'react-virtuoso';
 
 export default function App() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -19,8 +20,21 @@ export default function App() {
   const [currentComp, setCurrentComp] = useState('ALL');
   const [search, setSearch] = useState('');
   
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  
   const [roundId, setRoundId] = useState('');
   
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // Fetch rounds on mount and select the appropriate one
   useEffect(() => {
     let isMounted = true;
@@ -148,9 +162,8 @@ export default function App() {
       const now = new Date();
       const tzOffset = now.getTimezoneOffset() * 60000; 
       const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 19).replace('T', ' ');
-      await saveStatusApi(target.id, status, remark, userInfo.name, localISOTime);
       
-      // Update checkDate in local state as well
+      // Update checkDate in local state immediately for offline-first support
       setUserInfo(prev => {
         if (!prev) return prev;
         return {
@@ -162,8 +175,14 @@ export default function App() {
           )
         };
       });
+
+      // Fire and forget (Firebase will queue this in IndexedDB if offline)
+      saveStatusApi(target.id, status, remark, userInfo.name, localISOTime).catch(e => {
+        console.error('Failed to save', e);
+      });
+      
     } catch (e) {
-      console.error('Failed to save', e);
+      console.error('Failed to update', e);
     }
   };
 
@@ -362,9 +381,11 @@ export default function App() {
                 </div>
               </div>
               
-              <div className="flex-1 overflow-y-auto w-full">
-                <AnimatePresence>
-                  {filteredList.map(item => (
+              <div className="flex-1 overflow-hidden w-full relative">
+                <Virtuoso
+                  style={{ height: '100%', width: '100%' }}
+                  data={filteredList}
+                  itemContent={(index, item) => (
                     <WorkerRow 
                       key={item.rowIndex} 
                       item={item} 
@@ -373,8 +394,8 @@ export default function App() {
                       onSave={handleSave}
                       onOpenModal={setModalWorker}
                     />
-                  ))}
-                </AnimatePresence>
+                  )}
+                />
                 
                 {filteredList.length === 0 && (
                   <div className="py-20 text-center opacity-50">

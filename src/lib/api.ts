@@ -72,40 +72,42 @@ export async function saveStatusApi(
   }, { merge: true });
 }
 
-export async function uploadExcelApi(roundId: string, rows: any[]) {
-  const withTimeout = (promise: Promise<any>, ms: number, msg: string) => {
-    return Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT: ' + msg)), ms))
-    ]);
-  };
-
+export async function uploadExcelApi(roundId: string, rows: any[], onProgress?: (msg: string, percent: number) => void) {
   try {
+    if (onProgress) onProgress("기존 데이터를 가져오는 중입니다...", 0);
     console.log("uploadExcelApi: fetching existing docs...");
     const q = query(collection(db, 'workers'), where('roundId', '==', roundId));
-    const snap = await withTimeout(getDocs(q), 10000, "getDocs");
+    const snap = await getDocs(q);
     
     console.log("uploadExcelApi: found " + snap.size + " docs to delete.");
     let batch1 = writeBatch(db);
     let count = 0;
+    let deletedCount = 0;
+    const totalToDelete = snap.size;
     for (const d of snap.docs) {
       batch1.delete(d.ref);
       count++;
+      deletedCount++;
       if (count === 400) {
+        if (onProgress) onProgress(`기존 데이터 삭제 중... (${deletedCount}/${totalToDelete})`, (deletedCount/totalToDelete)*30);
         console.log("uploadExcelApi: committing delete batch of 400...");
-        await withTimeout(batch1.commit(), 15000, "delete batch commit");
+        await batch1.commit();
         batch1 = writeBatch(db);
         count = 0;
       }
     }
     if (count > 0) {
+      if (onProgress) onProgress(`기존 데이터 삭제 완료 (${deletedCount}/${totalToDelete})`, 30);
       console.log("uploadExcelApi: committing final delete batch...");
-      await withTimeout(batch1.commit(), 15000, "delete batch commit");
+      await batch1.commit();
     }
 
+    if (onProgress) onProgress(`새 데이터 ${rows.length}건 입력 준비 중...`, 30);
     console.log("uploadExcelApi: inserting " + rows.length + " new rows...");
     let batch = writeBatch(db);
     let ops = 0;
+    let insertedCount = 0;
+    const totalToInsert = rows.length;
     for (const r of rows) {
       const newDoc = doc(collection(db, 'workers'));
       batch.set(newDoc, {
@@ -122,20 +124,24 @@ export async function uploadExcelApi(roundId: string, rows: any[]) {
         checkDate: ''
       });
       ops++;
+      insertedCount++;
       if (ops === 400) {
+        if (onProgress) onProgress(`새 데이터 저장 중... (${insertedCount}/${totalToInsert})`, 30 + (insertedCount/totalToInsert)*70);
         console.log("uploadExcelApi: committing insert batch of 400...");
-        await withTimeout(batch.commit(), 15000, "insert batch commit");
+        await batch.commit();
         batch = writeBatch(db);
         ops = 0;
       }
     }
     if (ops > 0) {
+      if (onProgress) onProgress(`저장 마무리 중...`, 99);
       console.log("uploadExcelApi: committing final insert batch of " + ops + "...");
-      await withTimeout(batch.commit(), 15000, "final insert batch commit");
+      await batch.commit();
     }
     
     // Make sure to add to rounds collection as well
     await setDoc(doc(db, 'rounds', roundId), { createdAt: new Date() }, { merge: true });
+    if (onProgress) onProgress(`저장 완료!`, 100);
     console.log("uploadExcelApi: finished successfully.");
   } catch (err) {
     console.error("uploadExcelApi FATAL ERROR:", err);
@@ -144,16 +150,9 @@ export async function uploadExcelApi(roundId: string, rows: any[]) {
 }
 
 export async function deleteRoundApi(roundId: string) {
-  const withTimeout = (promise: Promise<any>, ms: number, msg: string) => {
-    return Promise.race([
-      promise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT: ' + msg)), ms))
-    ]);
-  };
-  
   console.log("deleteRoundApi: fetching existing docs...");
   const q = query(collection(db, 'workers'), where('roundId', '==', roundId));
-  const snap = await withTimeout(getDocs(q), 10000, "getDocs");
+  const snap = await getDocs(q);
   
   console.log("deleteRoundApi: found " + snap.size + " docs to delete.");
   let batch = writeBatch(db);
@@ -163,7 +162,7 @@ export async function deleteRoundApi(roundId: string) {
     count++;
     if (count === 400) {
       console.log("deleteRoundApi: committing delete batch of 400...");
-      await withTimeout(batch.commit(), 15000, "delete batch commit");
+      await batch.commit();
       batch = writeBatch(db);
       count = 0;
     }
@@ -176,7 +175,7 @@ export async function deleteRoundApi(roundId: string) {
   
   if (count > 0) {
     console.log("deleteRoundApi: committing final delete batch...");
-    await withTimeout(batch.commit(), 15000, "delete batch commit");
+    await batch.commit();
   }
   console.log("deleteRoundApi: finished successfully.");
 }

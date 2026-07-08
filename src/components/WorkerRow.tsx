@@ -17,11 +17,8 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
   const isTarget = ['o', 'ㅇ', '0', '○', 'v'].includes(checkVal);
   
   return (
-    <motion.div 
+    <div 
       ref={ref}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
       className={cn(
         "px-5 py-3.5 border-b border-gray-100/80 active:bg-gray-100 transition-colors",
         item.status?.trim() === '확인' ? "bg-blue-50/30" : (item.status && item.status.trim() !== '확인' ? "bg-red-50/20" : "")
@@ -81,6 +78,6 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
         )}
       </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
