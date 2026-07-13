@@ -109,6 +109,15 @@ export default function App() {
         const list = await fetchWorkersApi(roundId);
         setUserInfo({ role: json.role as any, name: json.name, list });
         localStorage.setItem('sh_user_info', JSON.stringify({ name, pw }));
+        
+        // Try to request fullscreen
+        try {
+          if (document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen();
+          }
+        } catch (err) {
+          console.warn("Fullscreen request failed", err);
+        }
       } else {
         if (!autoLogin) alert(json.message);
         localStorage.removeItem('sh_user_info');
