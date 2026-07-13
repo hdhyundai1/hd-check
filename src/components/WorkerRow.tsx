@@ -86,9 +86,9 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
               {confirmState && (
                 <button 
                   onClick={confirmNormalAttendance}
-                  className="absolute bg-[#34C759] text-white font-bold text-[13px] px-4 py-1.5 rounded-full shadow-lg active:opacity-70 whitespace-nowrap z-10 animate-in fade-in zoom-in-95 duration-150"
+                  className="absolute inset-0 w-full h-full flex items-center justify-center bg-[#34C759] text-white font-bold text-[13px] rounded-full shadow-lg active:opacity-70 z-10 animate-in fade-in zoom-in-95 duration-150"
                 >
-                  정말 등록하시겠습니까?
+                  확실한겨?
                 </button>
               )}
             </div>

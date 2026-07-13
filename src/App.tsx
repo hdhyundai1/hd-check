@@ -267,7 +267,7 @@ export default function App() {
     <div className="flex flex-col h-full w-full bg-[#F2F2F7] text-[#1C1C1E] font-sans overflow-hidden">
       <header 
         className="bg-white/80 backdrop-blur-md text-[#1C1C1E] px-3 md:px-6 flex justify-between items-center shadow-sm border-b border-gray-200 shrink-0 z-50 sticky top-0"
-        style={{ height: "54px" }}
+        style={{ height: "49px" }}
       >
         <div className="flex items-center gap-2 md:gap-4 min-w-0 shrink">
           <div className="hidden sm:block px-3 py-1 bg-blue-500 rounded text-[10px] font-bold tracking-widest uppercase text-white shrink-0">HD Hyundai</div>
@@ -312,7 +312,7 @@ export default function App() {
       </header>
 
       <div className="flex-1 flex flex-col overflow-hidden w-full">
-        <div className="pr-4 md:p-6 shrink-0 bg-[#F2F2F7] z-10 overflow-y-auto max-h-[50vh]" style={{ paddingLeft: "16px", paddingTop: "5px", paddingBottom: "5px" }}>
+        <div className="pr-4 md:p-6 shrink-0 bg-[#F2F2F7] z-10 overflow-y-auto max-h-[50vh]" style={{ paddingLeft: "16px", paddingTop: "5px", paddingBottom: "5px", height: "225.5px" }}>
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-4">
           <div className="space-y-1 relative">
             <label className="text-[10px] font-bold text-slate-500 ml-1">SELECT COMPANY</label>
@@ -337,6 +337,7 @@ export default function App() {
                 "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm",
                 currentTab === 'all' ? "bg-white ring-2 ring-blue-500" : "bg-white/60 hover:bg-white"
               )}
+              style={{ height: "75px" }}
             >
               <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-1">전체확인</p>
               <p className="text-xl md:text-2xl font-black tracking-tighter">{stats.total} <span className="text-[10px] md:text-sm font-medium text-slate-400">명</span></p>
@@ -347,6 +348,7 @@ export default function App() {
                 "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm",
                 currentTab === 'un' ? "bg-white ring-2 ring-red-500" : "bg-white/60 hover:bg-white"
               )}
+              style={{ height: "75px" }}
             >
               <p className="text-[10px] md:text-xs font-bold text-red-600 mb-1">미확인</p>
               <p className="text-xl md:text-2xl font-black tracking-tighter text-red-700">{stats.no} <span className="text-[10px] md:text-sm font-medium text-red-400">명</span></p>
@@ -357,6 +359,7 @@ export default function App() {
                 "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm",
                 currentTab === 'ok' ? "bg-white ring-2 ring-blue-500" : "bg-white/60 hover:bg-white"
               )}
+              style={{ height: "75px" }}
             >
               <p className="text-[10px] md:text-xs font-bold text-blue-600 mb-1">확인</p>
               <p className="text-xl md:text-2xl font-black tracking-tighter text-blue-700">{stats.ok} <span className="text-[10px] md:text-sm font-medium text-blue-400">명</span></p>
@@ -369,14 +372,14 @@ export default function App() {
             </div>
           </div>
 
-          <div className="space-y-1" style={{ height: "70.5px", paddingTop: "-3px", marginTop: "-16px" }}>
+          <div className="space-y-1" style={{ height: "66.5px", paddingTop: "-3px", marginTop: "-16px" }}>
             <label className="text-[10px] font-bold text-slate-500 ml-1">SEARCH OPERATOR</label>
             <div className="relative">
               <input 
                 type="text" 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-[#e3e3e8] pl-9 pr-3 py-2.5 rounded-[10px] font-medium text-[15px] border-0 outline-none focus:ring-2 focus:ring-blue-500 transition-colors placeholder:text-slate-400" style={{ height: "40px" }} 
+                className="w-full bg-[#e3e3e8] pl-9 pr-3 py-2.5 rounded-[10px] font-medium text-[15px] border-0 outline-none focus:ring-2 focus:ring-blue-500 transition-colors placeholder:text-slate-400" style={{ height: "37px" }} 
                 placeholder="이름 / 초성 검색..." 
               />
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8e8e93] w-4 h-4 ml-1" />
@@ -386,7 +389,7 @@ export default function App() {
         </div>
 
         <main className="flex-1 flex flex-col overflow-hidden bg-[#F2F2F7]">
-          <div className="flex-1 overflow-hidden flex flex-col gap-4" style={{ paddingTop: "4px" }}>
+          <div className="flex-1 overflow-hidden flex flex-col gap-4" style={{ paddingTop: "4px", height: "394.5px" }}>
             <div className="w-full max-w-5xl mx-auto flex justify-between items-center px-4 md:px-6 shrink-0 mt-4">
               <h2 className="text-xs font-black text-slate-400 tracking-widest uppercase">
                 Worker Registry
