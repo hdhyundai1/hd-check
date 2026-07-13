@@ -1,6 +1,9 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence, setLogLevel } from 'firebase/firestore';
 import config from '../../firebase-applet-config.json';
+
+// Suppress internal Firebase console.error logs for Quota and permission errors
+setLogLevel('silent');
 
 const app = initializeApp(config);
 export const db = getFirestore(app, config.firestoreDatabaseId);

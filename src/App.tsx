@@ -113,9 +113,13 @@ export default function App() {
         if (!autoLogin) alert(json.message);
         localStorage.removeItem('sh_user_info');
       }
-    } catch (e) {
-      console.error(e);
-      if (!autoLogin) alert('서버 연결 실패');
+    } catch (e: any) {
+      if (e?.message?.includes('Quota') || String(e).includes('Quota')) {
+        if (!autoLogin) alert('데이터베이스 일일 무료 사용량을 초과했습니다. 내일 다시 시도해주세요.');
+      } else {
+        console.error(e);
+        if (!autoLogin) alert('서버 연결 실패: ' + (e.message || ''));
+      }
     } finally {
       setIsLoading(false);
       setGlobalLoading(false);
@@ -160,6 +164,10 @@ export default function App() {
       };
     });
 
+    // Clear the search query after saving status
+    setSearch('');
+
+
     try {
       const now = new Date();
       const tzOffset = now.getTimezoneOffset() * 60000; 
@@ -179,12 +187,20 @@ export default function App() {
       });
 
       // Fire and forget (Firebase will queue this in IndexedDB if offline)
-      saveStatusApi(target.id!, status, remark, userInfo.name, localISOTime).catch(e => {
-        console.error('Failed to save', e);
+      saveStatusApi(target.id!, status, remark, userInfo.name, localISOTime).catch((e: any) => {
+        if (e?.message?.includes('Quota') || String(e).includes('Quota')) {
+          alert('데이터베이스 일일 무료 사용량을 초과했습니다. 내일 다시 시도해주세요.');
+        } else {
+          console.error('Failed to save', e);
+        }
       });
       
-    } catch (e) {
-      console.error('Failed to update', e);
+    } catch (e: any) {
+      if (e?.message?.includes('Quota') || String(e).includes('Quota')) {
+        alert('데이터베이스 일일 무료 사용량을 초과했습니다. 내일 다시 시도해주세요.');
+      } else {
+        console.error('Failed to update', e);
+      }
     }
   };
 

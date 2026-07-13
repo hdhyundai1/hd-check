@@ -84,8 +84,13 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
         setRoundId(`${yy}-${mm}-${dd}`);
       }
       onUploadSuccess();
-    } catch(e) {
-      setUploadMessage('삭제 중 오류가 발생했습니다.'); setUploadStep(3);
+    } catch(e: any) {
+      if (e?.message?.includes('Quota') || String(e).includes('Quota')) {
+        setUploadMessage('일일 할당량을 초과하여 삭제할 수 없습니다.');
+      } else {
+        setUploadMessage('삭제 중 오류가 발생했습니다.'); 
+      }
+      setUploadStep(3);
     } finally {
       setIsDeleting(false);
     }
@@ -180,9 +185,13 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
       setUploadMessage(`성공적으로 ${uploadRows.length}명의 명단이 업로드되었습니다.`);
       setUploadStep(2); // success
       onUploadSuccess();
-    } catch(err) {
-      console.error(err);
-      setUploadMessage('업로드 서버 오류가 발생했습니다.');
+    } catch(err: any) {
+      if (err?.message?.includes('Quota') || String(err).includes('Quota')) {
+        setUploadMessage('일일 할당량을 초과하여 업로드할 수 없습니다.');
+      } else {
+        console.error(err);
+        setUploadMessage('업로드 서버 오류가 발생했습니다.');
+      }
       setUploadStep(3); // error
     } finally {
       setIsUploading(false);

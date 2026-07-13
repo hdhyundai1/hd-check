@@ -5,6 +5,9 @@ import './index.css';
 
 // Add global error handler for debugging
 window.addEventListener('error', (event) => {
+  const isQuota = event.error?.message?.includes('Quota') || event.message?.includes('Quota') || String(event.error).includes('Quota');
+  if (isQuota) return;
+  
   console.error("Global Error Caught:", event.error);
   const errDiv = document.createElement('div');
   errDiv.style.position = 'fixed';
@@ -19,6 +22,9 @@ window.addEventListener('error', (event) => {
 });
 
 window.addEventListener('unhandledrejection', (event) => {
+  const isQuota = event.reason?.message?.includes('Quota') || String(event.reason).includes('Quota');
+  if (isQuota) return;
+
   console.error("Unhandled Promise Rejection:", event.reason);
   const errDiv = document.createElement('div');
   errDiv.style.position = 'fixed';

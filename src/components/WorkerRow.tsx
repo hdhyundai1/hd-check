@@ -16,6 +16,27 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
   const checkVal = String(item.targetCheck || '').trim().toLowerCase();
   const isTarget = ['o', 'ㅇ', '0', '○', 'v'].includes(checkVal);
   
+  const [confirmState, setConfirmState] = React.useState(false);
+  const confirmTimeoutRef = React.useRef<NodeJS.Timeout>();
+
+  const handleNormalAttendance = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirmState) {
+      setConfirmState(true);
+      if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
+      confirmTimeoutRef.current = setTimeout(() => {
+        setConfirmState(false);
+      }, 3000);
+    }
+  };
+
+  const confirmNormalAttendance = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
+    setConfirmState(false);
+    onSave(item.id || item.rowIndex, '확인', '');
+  };
+
   return (
     <div 
       ref={ref}
@@ -55,12 +76,22 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
       <div className="flex gap-2 shrink-0">
         {!item.status ? (
           <>
-            <button 
-              onClick={() => onSave(item.id || item.rowIndex, '확인', '')} 
-              className="bg-[#007AFF] text-white font-semibold text-[13px] px-4 py-1.5 rounded-full active:opacity-70 transition-all shrink-0"
-            >
-              정상출근
-            </button>
+            <div className="relative flex items-center justify-center">
+              <button 
+                onClick={handleNormalAttendance} 
+                className="bg-[#007AFF] text-white font-semibold text-[13px] px-4 py-1.5 rounded-full active:opacity-70 transition-all shrink-0"
+              >
+                정상출근
+              </button>
+              {confirmState && (
+                <button 
+                  onClick={confirmNormalAttendance}
+                  className="absolute bg-[#34C759] text-white font-bold text-[13px] px-4 py-1.5 rounded-full shadow-lg active:opacity-70 whitespace-nowrap z-10 animate-in fade-in zoom-in-95 duration-150"
+                >
+                  정말 등록하시겠습니까?
+                </button>
+              )}
+            </div>
             <button 
               onClick={() => onOpenModal(item)} 
               className="bg-[#FF3B30]/10 text-[#FF3B30] font-semibold text-[13px] px-4 py-1.5 rounded-full active:opacity-70 transition-all shrink-0"

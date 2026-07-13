@@ -38,7 +38,10 @@ export async function loginApi(name: string, pw: string) {
     });
 
     return { status: 'success', role: 'USER', name };
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.message?.includes('Quota') || String(error).includes('Quota')) {
+      throw error;
+    }
     console.error('Firebase Login Error:', error);
     return { status: 'success', role: 'USER', name };
   }
@@ -143,8 +146,10 @@ export async function uploadExcelApi(roundId: string, rows: any[], onProgress?: 
     await setDoc(doc(db, 'rounds', roundId), { createdAt: new Date() }, { merge: true });
     if (onProgress) onProgress(`저장 완료!`, 100);
     console.log("uploadExcelApi: finished successfully.");
-  } catch (err) {
-    console.error("uploadExcelApi FATAL ERROR:", err);
+  } catch (err: any) {
+    if (!(err?.message?.includes('Quota') || String(err).includes('Quota'))) {
+      console.error("uploadExcelApi FATAL ERROR:", err);
+    }
     throw err;
   }
 }
@@ -188,8 +193,12 @@ export async function fetchAvailableRoundsApi(): Promise<string[]> {
       return snap.docs.map(d => d.id).sort().reverse();
     }
     return [];
-  } catch (error) {
-    console.error("fetchAvailableRoundsApi Error:", error);
+  } catch (error: any) {
+    if (error?.message?.includes('Quota') || String(error).includes('Quota')) {
+      alert('데이터베이스 일일 무료 사용량을 초과했습니다. 내일 다시 시도해주세요.');
+    } else {
+      console.error("fetchAvailableRoundsApi Error:", error);
+    }
     return [];
   }
 }
@@ -216,7 +225,11 @@ export function subscribeWorkersApi(roundId: string, callback: (list: Worker[]) 
     (callback as any).__debounceTimer = setTimeout(() => {
       callback(list);
     }, 200);
-  }, (error) => {
-    console.error("subscribeWorkersApi error", error);
+  }, (error: any) => {
+    if (error?.message?.includes('Quota') || String(error).includes('Quota')) {
+      alert('데이터베이스 일일 무료 사용량을 초과했습니다. 내일 다시 시도해주세요.');
+    } else {
+      console.error("subscribeWorkersApi error", error);
+    }
   });
 }
