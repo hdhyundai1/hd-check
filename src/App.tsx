@@ -112,9 +112,21 @@ export default function App() {
         
         // Try to request fullscreen
         try {
-          if (document.documentElement.requestFullscreen) {
-            await document.documentElement.requestFullscreen();
+          const docElm = document.documentElement as any;
+          if (docElm.requestFullscreen) {
+            await docElm.requestFullscreen();
+          } else if (docElm.webkitRequestFullscreen) {
+            await docElm.webkitRequestFullscreen();
+          } else if (docElm.mozRequestFullScreen) {
+            await docElm.mozRequestFullScreen();
+          } else if (docElm.msRequestFullscreen) {
+            await docElm.msRequestFullscreen();
           }
+          
+          // Fallback for some mobile browsers (like Safari) to hide address bar
+          setTimeout(() => {
+            window.scrollTo(0, 1);
+          }, 100);
         } catch (err) {
           console.warn("Fullscreen request failed", err);
         }
