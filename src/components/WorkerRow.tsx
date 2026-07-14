@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Worker } from '../types';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
@@ -10,31 +10,36 @@ interface WorkerRowProps {
   showCompany: boolean;
   onSave: (rowIndexOrId: number | string, status: string, remark: string) => Promise<void> | void;
   onOpenModal: (worker: Worker) => void;
+  activeConfirmId?: string | number | null;
+  setActiveConfirmId?: (id: string | number | null) => void;
 }
 
-export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpenModal, ref }: WorkerRowProps & { ref?: React.Ref<HTMLDivElement> }) {
+export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpenModal, activeConfirmId, setActiveConfirmId, ref }: WorkerRowProps & { ref?: React.Ref<HTMLDivElement> }) {
   const checkVal = String(item.targetCheck || '').trim().toLowerCase();
   const isTarget = ['o', 'ㅇ', '0', '○', 'v'].includes(checkVal);
-  
-  const [confirmState, setConfirmState] = React.useState(false);
-  const confirmTimeoutRef = React.useRef<NodeJS.Timeout>();
+  const itemId = item.id || item.rowIndex;
+  const confirmState = activeConfirmId === itemId;
+
+  useEffect(() => {
+    if (confirmState) {
+      const timer = setTimeout(() => {
+        setActiveConfirmId?.(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [confirmState, setActiveConfirmId]);
 
   const handleNormalAttendance = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirmState) {
-      setConfirmState(true);
-      if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
-      confirmTimeoutRef.current = setTimeout(() => {
-        setConfirmState(false);
-      }, 3000);
+      setActiveConfirmId?.(itemId);
     }
   };
 
   const confirmNormalAttendance = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
-    setConfirmState(false);
-    onSave(item.id || item.rowIndex, '확인', '');
+    setActiveConfirmId?.(null);
+    onSave(itemId, '확인', '');
   };
 
   return (
@@ -42,7 +47,9 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
       ref={ref}
       className={cn(
         "px-5 py-3.5 border-b border-gray-100/80 active:bg-gray-100 transition-colors",
-        item.status?.trim() === '확인' ? "bg-blue-50/30" : (item.status && item.status.trim() !== '확인' ? "bg-red-50/20" : "")
+        confirmState ? "bg-amber-100" : (
+          item.status?.trim() === '확인' ? "bg-blue-50/30" : (item.status && item.status.trim() !== '확인' ? "bg-red-50/20" : "")
+        )
       )}
     >
       <div className="flex w-full max-w-5xl mx-auto justify-between items-center gap-3">
@@ -54,7 +61,10 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
           {item.name}
         </span>
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[13px] text-[#8E8E93] shrink-0">
+          <span className={cn(
+            "text-[13px] shrink-0 transition-colors",
+            confirmState ? "text-red-600 font-bold" : "text-[#8E8E93]"
+          )}>
             {item.dob}
           </span>
           {!!item.status && (

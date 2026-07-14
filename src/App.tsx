@@ -19,6 +19,7 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<'all' | 'un' | 'ok'>('all');
   const [currentComp, setCurrentComp] = useState('ALL');
   const [search, setSearch] = useState('');
+  const [activeConfirmId, setActiveConfirmId] = useState<string | number | null>(null);
   
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   
@@ -136,7 +137,7 @@ export default function App() {
       }
     } catch (e: any) {
       if (e?.message?.includes('Quota') || String(e).includes('Quota')) {
-        if (!autoLogin) alert('데이터베이스 일일 무료 사용량을 초과했습니다. 내일 다시 시도해주세요.');
+        if (!autoLogin) alert('데이터베이스 할당량(Quota)을 초과했습니다. 요금제 반영 지연이거나 설정된 한도를 확인해주세요.');
       } else {
         console.error(e);
         if (!autoLogin) alert('서버 연결 실패: ' + (e.message || ''));
@@ -210,7 +211,7 @@ export default function App() {
       // Fire and forget (Firebase will queue this in IndexedDB if offline)
       saveStatusApi(target.id!, status, remark, userInfo.name, localISOTime).catch((e: any) => {
         if (e?.message?.includes('Quota') || String(e).includes('Quota')) {
-          alert('데이터베이스 일일 무료 사용량을 초과했습니다. 내일 다시 시도해주세요.');
+          alert('데이터베이스 할당량(Quota)을 초과했습니다. 요금제 반영 지연이거나 설정된 한도를 확인해주세요.');
         } else {
           console.error('Failed to save', e);
         }
@@ -218,7 +219,7 @@ export default function App() {
       
     } catch (e: any) {
       if (e?.message?.includes('Quota') || String(e).includes('Quota')) {
-        alert('데이터베이스 일일 무료 사용량을 초과했습니다. 내일 다시 시도해주세요.');
+        alert('데이터베이스 할당량(Quota)을 초과했습니다. 요금제 반영 지연이거나 설정된 한도를 확인해주세요.');
       } else {
         console.error('Failed to update', e);
       }
@@ -442,6 +443,8 @@ export default function App() {
                       showCompany={currentComp === 'ALL'}
                       onSave={handleSave}
                       onOpenModal={setModalWorker}
+                      activeConfirmId={activeConfirmId}
+                      setActiveConfirmId={setActiveConfirmId}
                     />
                   )}
                 />
