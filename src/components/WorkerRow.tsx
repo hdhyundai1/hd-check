@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Worker } from '../types';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
+import { REASONS } from './ReasonModal';
 
 interface WorkerRowProps {
   key?: React.Key;
@@ -19,6 +20,7 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
   const isTarget = ['o', 'ㅇ', '0', '○', 'v'].includes(checkVal);
   const itemId = item.id || item.rowIndex;
   const confirmState = activeConfirmId === itemId;
+  const statusDef = item.status ? REASONS.find(r => r.id === item.status.trim()) : null;
 
   useEffect(() => {
     if (confirmState) {
@@ -69,8 +71,8 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
           </span>
           {!!item.status && (
             <span className={cn(
-              "text-[11px] px-2 py-0.5 rounded-full font-medium text-white shrink-0 ml-1",
-              item.status.trim() === '확인' ? 'bg-[#34C759]' : 'bg-[#FF3B30]'
+              "text-[11px] px-2 py-0.5 rounded-full font-medium shrink-0 ml-1",
+              item.status.trim() === '확인' ? 'bg-[#34C759] text-white' : (statusDef ? statusDef.classes : 'bg-[#FF3B30] text-white')
             )}>
               {item.status}
             </span>
@@ -78,7 +80,10 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
         </div>
         
         {item.status && item.status.trim() !== '확인' && item.remark && (
-          <span className="text-[13px] text-[#FF3B30] font-medium truncate max-w-[150px] md:max-w-[200px] ml-2 hidden md:block">
+          <span className={cn(
+            "text-[13px] font-medium truncate max-w-[150px] md:max-w-[200px] ml-2 hidden md:block",
+            statusDef ? statusDef.classes.split(' ').find(c => c.startsWith('text-')) : "text-[#FF3B30]"
+          )}>
             사유: {item.remark}
           </span>
         )}

@@ -9,13 +9,13 @@ interface ReasonModalProps {
   onSave: (rowIndexOrId: number | string, status: string, remark: string) => Promise<void> | void;
 }
 
-const REASONS = [
-  { id: '산재', classes: 'bg-orange-50 border-orange-200 text-orange-600 hover:bg-orange-100', activeClass: 'ring-orange-400', type: 'range' },
-  { id: '연차', classes: 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100', activeClass: 'ring-blue-400', type: 'single' },
-  { id: '휴가', classes: 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100', activeClass: 'ring-emerald-400', type: 'range' },
-  { id: '병가', classes: 'bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100', activeClass: 'ring-purple-400', type: 'range' },
-  { id: '퇴사', classes: 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100', activeClass: 'ring-red-400', type: 'single' },
-  { id: '기타', classes: 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100', activeClass: 'ring-slate-400', type: 'range_text' },
+export const REASONS = [
+  { id: '산재', classes: 'bg-orange-50 border border-orange-200 text-orange-600 hover:bg-orange-100', activeClass: 'ring-orange-400', type: 'range' },
+  { id: '연차', classes: 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100', activeClass: 'ring-blue-400', type: 'single' },
+  { id: '휴가', classes: 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100', activeClass: 'ring-emerald-400', type: 'range' },
+  { id: '병가', classes: 'bg-purple-50 border border-purple-200 text-purple-600 hover:bg-purple-100', activeClass: 'ring-purple-400', type: 'range' },
+  { id: '퇴사', classes: 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100', activeClass: 'ring-red-400', type: 'single' },
+  { id: '기타', classes: 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100', activeClass: 'ring-slate-400', type: 'range_text' },
 ];
 
 export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProps) {
@@ -87,7 +87,7 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
       }
     }
 
-    onSave(worker.id || worker.rowIndex, '부재중 확인', finalReason);
+    onSave(worker.id || worker.rowIndex, selectedCategory, finalReason);
     onClose();
   };
 
