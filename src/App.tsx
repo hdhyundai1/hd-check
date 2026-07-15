@@ -9,6 +9,7 @@ import DashboardModal from './components/DashboardModal';
 import WorkerRow from './components/WorkerRow';
 import ReasonModal from './components/ReasonModal';
 import { AnimatePresence } from 'motion/react';
+import { Virtuoso } from 'react-virtuoso';
 
 export default function App() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -285,7 +286,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-[#F2F2F7] text-[#1C1C1E] font-sans">
+    <div className="flex flex-col h-full w-full bg-[#F2F2F7] text-[#1C1C1E] font-sans overflow-hidden">
       <header 
         className="bg-white/80 backdrop-blur-md text-[#1C1C1E] px-3 md:px-6 flex justify-between items-center shadow-sm border-b border-gray-200 shrink-0 z-50 sticky top-0"
         style={{ height: "49px" }}
@@ -332,8 +333,8 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex flex-col w-full">
-        <div className="pr-4 md:p-6 shrink-0 bg-[#F2F2F7] z-10" style={{ paddingLeft: "16px", paddingTop: "5px", paddingBottom: "5px" }}>
+      <div className="flex-1 flex flex-col overflow-hidden w-full">
+        <div className="pr-4 md:p-6 shrink-0 bg-[#F2F2F7] z-10 overflow-y-auto max-h-[50vh]" style={{ paddingLeft: "16px", paddingTop: "5px", paddingBottom: "5px", height: "225.5px" }}>
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-4">
           <div className="space-y-1 relative">
             <label className="text-[10px] font-bold text-slate-500 ml-1">SELECT COMPANY</label>
@@ -409,8 +410,8 @@ export default function App() {
           </div>
         </div>
 
-        <main className="flex flex-col bg-[#F2F2F7]">
-          <div className="flex flex-col gap-4" style={{ paddingTop: "4px" }}>
+        <main className="flex-1 flex flex-col overflow-hidden bg-[#F2F2F7]">
+          <div className="flex-1 overflow-hidden flex flex-col gap-4" style={{ paddingTop: "4px", height: "394.5px" }}>
             <div className="w-full max-w-5xl mx-auto flex justify-between items-center px-4 md:px-6 shrink-0 mt-4">
               <h2 className="text-xs font-black text-slate-400 tracking-widest uppercase">
                 Worker Registry
@@ -422,7 +423,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-white md:rounded-[20px] shadow-sm flex flex-col mb-0 md:mb-4 border-t md:border-x border-gray-100">
+            <div className="bg-white md:rounded-[20px] shadow-sm flex-1 flex flex-col overflow-hidden min-h-0 mb-0 md:mb-4 border-t md:border-x border-gray-100">
               <div className="hidden md:flex justify-center bg-white border-b border-gray-100 px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-wider shrink-0" style={{ height: "48.5px" }}>
                 <div className="flex justify-between items-center w-full max-w-5xl">
                   <div>Worker Name & DOB</div>
@@ -430,19 +431,23 @@ export default function App() {
                 </div>
               </div>
               
-              <div className="w-full relative">
-                {filteredList.map((item, index) => (
-                  <WorkerRow 
-                    key={item.id || `${item.rowIndex}-${index}`} 
-                    item={item} 
-                    currentTab={currentTab} 
-                    showCompany={currentComp === 'ALL'}
-                    onSave={handleSave}
-                    onOpenModal={setModalWorker}
-                    activeConfirmId={activeConfirmId}
-                    setActiveConfirmId={setActiveConfirmId}
-                  />
-                ))}
+              <div className="flex-1 overflow-hidden w-full relative">
+                <Virtuoso
+                  style={{ height: '100%', width: '100%' }}
+                  data={filteredList}
+                  itemContent={(index, item) => (
+                    <WorkerRow 
+                      key={item.rowIndex} 
+                      item={item} 
+                      currentTab={currentTab} 
+                      showCompany={currentComp === 'ALL'}
+                      onSave={handleSave}
+                      onOpenModal={setModalWorker}
+                      activeConfirmId={activeConfirmId}
+                      setActiveConfirmId={setActiveConfirmId}
+                    />
+                  )}
+                />
                 
                 {filteredList.length === 0 && (
                   <div className="py-20 text-center opacity-50">
