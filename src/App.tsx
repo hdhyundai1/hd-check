@@ -24,6 +24,50 @@ export default function App() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   
   const [roundId, setRoundId] = useState('');
+  const [availableRounds, setAvailableRounds] = useState<string[]>([]);
+
+  const handleSelectRound = (newRoundId: string) => {
+    setRoundId(newRoundId);
+    localStorage.setItem('sh_selected_round', newRoundId);
+  };
+
+  const refreshRounds = async () => {
+    try {
+      const rounds = await fetchAvailableRoundsApi();
+      setAvailableRounds(rounds);
+      return rounds;
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  };
+
+  const roundOptions = useMemo(() => {
+    const yearGroups: Record<string, string[]> = {};
+    availableRounds.forEach(r => {
+      const y = r.substring(0, 4);
+      if (!yearGroups[y]) yearGroups[y] = [];
+      yearGroups[y].push(r);
+    });
+        
+    const options: { id: string, label: string }[] = [];
+    Object.keys(yearGroups).forEach(y => {
+      const sorted = yearGroups[y].sort();
+      sorted.forEach((r, idx) => {
+        const fromDateStr = r.split('_')[0];
+        const d = new Date(fromDateStr);
+        if (isNaN(d.getTime())) return;
+        const yy = String(d.getFullYear()).slice(-2);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        options.push({
+          id: r,
+          label: `${yy}년 ${idx + 1}차수 (${mm}월${dd}일)`
+        });
+      });
+    });
+    return options.sort((a, b) => b.id.localeCompare(a.id));
+  }, [availableRounds]);
   
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -41,6 +85,7 @@ export default function App() {
     let isMounted = true;
     fetchAvailableRoundsApi().then(rounds => {
       if (!isMounted) return;
+      setAvailableRounds(rounds);
       if (rounds.length === 0) {
         const d = new Date();
         const yy = d.getFullYear();
@@ -50,24 +95,18 @@ export default function App() {
         return;
       }
       
-      const d = new Date();
-      const yy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const todayStr = `${yy}-${mm}-${dd}`;
-      
-      // Sort rounds by from date (descending)
+      // Sort rounds by from date (descending: newest first, e.g. 2차수 -> 1차수)
       rounds.sort((a, b) => b.localeCompare(a));
       
-      let selected = rounds[0]; // fallback to newest
-      for (const r of rounds) {
-        const fromDate = r.split('_')[0];
-        if (fromDate <= todayStr) {
-          selected = r;
-          break;
-        }
+      // If user previously selected a round and it exists, preserve it
+      const savedRound = localStorage.getItem('sh_selected_round');
+      if (savedRound && rounds.includes(savedRound)) {
+        setRoundId(savedRound);
+        return;
       }
-      setRoundId(selected);
+
+      // Default to the newest round (e.g. 2차수)
+      setRoundId(rounds[0]);
     });
     
     return () => { isMounted = false; };
@@ -336,20 +375,41 @@ export default function App() {
       <div className="flex-1 flex flex-col overflow-hidden w-full">
         <div className="pr-4 md:p-6 shrink-0 bg-[#F2F2F7] z-10 overflow-y-auto max-h-[50vh]" style={{ paddingLeft: "16px", paddingTop: "5px", paddingBottom: "5px", height: "225.5px" }}>
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-4">
-          <div className="space-y-1 relative">
-            <label className="text-[10px] font-bold text-slate-500 ml-1">SELECT COMPANY</label>
-            <select 
-              style={{ marginBottom: "-6px", height: "40px", paddingTop: "4px", paddingBottom: "4px" }}
-              value={currentComp}
-              onChange={(e) => setCurrentComp(e.target.value)}
-              className="w-full bg-white p-3.5 rounded-[14px] font-bold text-base shadow-sm border-0 outline-none focus:ring-2 focus:ring-blue-500 appearance-none transition-colors"
-            >
-              <option value="ALL">전체 업체 보기</option>
-              {companies.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-[34px] text-slate-400 w-4 h-4 pointer-events-none" />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1 relative">
+              <label className="text-[10px] font-bold text-slate-500 ml-1">SELECT ROUND (차수)</label>
+              <select 
+                style={{ marginBottom: "-6px", height: "40px", paddingTop: "4px", paddingBottom: "4px" }}
+                value={roundId}
+                onChange={(e) => handleSelectRound(e.target.value)}
+                className="w-full bg-white p-2.5 rounded-[14px] font-bold text-xs sm:text-sm shadow-sm border-0 outline-none focus:ring-2 focus:ring-blue-500 appearance-none transition-colors truncate pr-7"
+              >
+                {roundOptions.length > 0 ? (
+                  roundOptions.map(opt => (
+                    <option key={opt.id} value={opt.id}>{opt.label}</option>
+                  ))
+                ) : (
+                  <option value={roundId}>{roundId ? roundId.replace('_', ' ~ ') : '차수 없음'}</option>
+                )}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-[32px] text-slate-400 w-4 h-4 pointer-events-none" />
+            </div>
+
+            <div className="space-y-1 relative">
+              <label className="text-[10px] font-bold text-slate-500 ml-1">SELECT COMPANY (업체)</label>
+              <select 
+                style={{ marginBottom: "-6px", height: "40px", paddingTop: "4px", paddingBottom: "4px" }}
+                value={currentComp}
+                onChange={(e) => setCurrentComp(e.target.value)}
+                className="w-full bg-white p-2.5 rounded-[14px] font-bold text-xs sm:text-sm shadow-sm border-0 outline-none focus:ring-2 focus:ring-blue-500 appearance-none transition-colors truncate pr-7"
+              >
+                <option value="ALL">전체 업체 보기</option>
+                {companies.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-[32px] text-slate-400 w-4 h-4 pointer-events-none" />
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2 md:gap-3">
@@ -496,9 +556,10 @@ export default function App() {
               <X className="w-5 h-5" />
             </button>
             <h2 className="text-[20px] font-bold text-[#1C1C1E] mb-6 tracking-tight">Administrator Settings</h2>
-            <AdminPanel roundId={roundId} setRoundId={setRoundId} workerList={userInfo?.list || []} onUploadSuccess={() => {
+            <AdminPanel roundId={roundId} setRoundId={handleSelectRound} workerList={userInfo?.list || []} onUploadSuccess={() => {
               setIsSettingsOpen(false);
               syncData();
+              refreshRounds();
             }} />
           </div>
         </div>
