@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, LogOut, ChevronDown, Search, Loader2, Power, Zap, Settings, X, BarChart3 } from 'lucide-react';
 import { UserInfo, Worker } from './types';
-import { loginApi, saveStatusApi, fetchWorkersApi, fetchAvailableRoundsApi, subscribeWorkersApi } from './lib/api';
+import { loginApi, saveStatusApi, fetchWorkersApi, fetchAvailableRoundsApi, subscribeWorkersApi, getActiveRoundApi, setActiveRoundApi, subscribeActiveRoundApi } from './lib/api';
 import { getChosung, cn } from './lib/utils';
 import Login from './components/Login';
 import AdminPanel from './components/AdminPanel';
@@ -26,9 +26,15 @@ export default function App() {
   const [roundId, setRoundId] = useState('');
   const [availableRounds, setAvailableRounds] = useState<string[]>([]);
 
-  const handleSelectRound = (newRoundId: string) => {
+  const handleSelectRound = async (newRoundId: string) => {
     setRoundId(newRoundId);
-    localStorage.setItem('sh_selected_round', newRoundId);
+    if (String(userInfo?.role).toUpperCase() === 'ADMIN') {
+      try {
+        await setActiveRoundApi(newRoundId);
+      } catch (e) {
+        console.error('Failed to set active round:', e);
+      }
+    }
   };
 
   const refreshRounds = async () => {
@@ -80,34 +86,48 @@ export default function App() {
     };
   }, []);
 
-  // Fetch rounds on mount and select the appropriate one
+  // Real-time synchronization of active round set by Admin
+  useEffect(() => {
+    const unsubscribe = subscribeActiveRoundApi((activeRound) => {
+      if (activeRound) {
+        setRoundId(activeRound);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fetch rounds on mount and determine active round
   useEffect(() => {
     let isMounted = true;
-    fetchAvailableRoundsApi().then(rounds => {
-      if (!isMounted) return;
-      setAvailableRounds(rounds);
-      if (rounds.length === 0) {
-        const d = new Date();
-        const yy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        setRoundId(`${yy}-${mm}-${dd}`);
-        return;
-      }
-      
-      // Sort rounds by from date (descending: newest first, e.g. 2차수 -> 1차수)
-      rounds.sort((a, b) => b.localeCompare(a));
-      
-      // If user previously selected a round and it exists, preserve it
-      const savedRound = localStorage.getItem('sh_selected_round');
-      if (savedRound && rounds.includes(savedRound)) {
-        setRoundId(savedRound);
-        return;
-      }
+    (async () => {
+      try {
+        const rounds = await fetchAvailableRoundsApi();
+        if (!isMounted) return;
+        setAvailableRounds(rounds);
 
-      // Default to the newest round (e.g. 2차수)
-      setRoundId(rounds[0]);
-    });
+        if (rounds.length === 0) {
+          const d = new Date();
+          const yy = d.getFullYear();
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          setRoundId(`${yy}-${mm}-${dd}`);
+          return;
+        }
+
+        // Check if an active round is set in Firestore
+        const globalActive = await getActiveRoundApi();
+        if (globalActive && rounds.includes(globalActive)) {
+          setRoundId(globalActive);
+          return;
+        }
+
+        // Fallback: newest round
+        rounds.sort((a, b) => b.localeCompare(a));
+        setRoundId(rounds[0]);
+      } catch (err) {
+        console.error("Initial rounds fetch error", err);
+      }
+    })();
     
     return () => { isMounted = false; };
   }, []);
@@ -376,24 +396,41 @@ export default function App() {
         <div className="pr-4 md:p-6 shrink-0 bg-[#F2F2F7] z-10 overflow-y-auto max-h-[50vh]" style={{ paddingLeft: "16px", paddingTop: "5px", paddingBottom: "5px", height: "225.5px" }}>
           <div className="w-full max-w-5xl mx-auto flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1 relative">
-              <label className="text-[10px] font-bold text-slate-500 ml-1">SELECT ROUND (차수)</label>
-              <select 
-                style={{ marginBottom: "-6px", height: "40px", paddingTop: "4px", paddingBottom: "4px" }}
-                value={roundId}
-                onChange={(e) => handleSelectRound(e.target.value)}
-                className="w-full bg-white p-2.5 rounded-[14px] font-bold text-xs sm:text-sm shadow-sm border-0 outline-none focus:ring-2 focus:ring-blue-500 appearance-none transition-colors truncate pr-7"
-              >
-                {roundOptions.length > 0 ? (
-                  roundOptions.map(opt => (
-                    <option key={opt.id} value={opt.id}>{opt.label}</option>
-                  ))
-                ) : (
-                  <option value={roundId}>{roundId ? roundId.replace('_', ' ~ ') : '차수 없음'}</option>
-                )}
-              </select>
-              <ChevronDown className="absolute right-2.5 top-[32px] text-slate-400 w-4 h-4 pointer-events-none" />
-            </div>
+            {String(userInfo?.role).toUpperCase() === 'ADMIN' ? (
+              <div className="space-y-1 relative">
+                <label className="text-[10px] font-bold text-slate-500 ml-1">차수 변경 (관리자)</label>
+                <select 
+                  style={{ marginBottom: "-6px", height: "40px", paddingTop: "4px", paddingBottom: "4px" }}
+                  value={roundId}
+                  onChange={(e) => handleSelectRound(e.target.value)}
+                  className="w-full bg-white p-2.5 rounded-[14px] font-bold text-xs sm:text-sm shadow-sm border-0 outline-none focus:ring-2 focus:ring-blue-500 appearance-none transition-colors truncate pr-7"
+                >
+                  {roundOptions.length > 0 ? (
+                    roundOptions.map(opt => (
+                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))
+                  ) : (
+                    <option value={roundId}>{roundId ? roundId.replace('_', ' ~ ') : '차수 없음'}</option>
+                  )}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-[32px] text-slate-400 w-4 h-4 pointer-events-none" />
+              </div>
+            ) : (
+              <div className="space-y-1 relative">
+                <label className="text-[10px] font-bold text-slate-500 ml-1">진행 점검 차수</label>
+                <div 
+                  style={{ marginBottom: "-6px", height: "40px", paddingTop: "4px", paddingBottom: "4px" }}
+                  className="w-full bg-white border border-blue-200/80 px-3 py-2 rounded-[14px] font-bold text-xs sm:text-sm text-blue-900 flex items-center justify-between shadow-xs select-none"
+                >
+                  <span className="truncate">
+                    {roundOptions.find(opt => opt.id === roundId)?.label || (roundId ? roundId.replace('_', ' ~ ') : '점검 차수')}
+                  </span>
+                  <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-black shrink-0 ml-1">
+                    진행중
+                  </span>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-1 relative">
               <label className="text-[10px] font-bold text-slate-500 ml-1">SELECT COMPANY (업체)</label>

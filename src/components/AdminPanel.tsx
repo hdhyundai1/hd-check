@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { FileSpreadsheet, Loader2, Download, AlertTriangle, Trash2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { uploadExcelApi, deleteRoundApi, fetchAvailableRoundsApi } from '../lib/api';
+import { uploadExcelApi, deleteRoundApi, fetchAvailableRoundsApi, setActiveRoundApi } from '../lib/api';
 import { Worker } from '../types';
 
 interface AdminPanelProps {
@@ -182,7 +182,12 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
         setUploadProgressMsg(msg);
         setUploadProgressPercent(percent);
       });
-      setUploadMessage(`성공적으로 ${uploadRows.length}명의 명단이 업로드되었습니다.`);
+      try {
+        await setActiveRoundApi(roundId);
+      } catch (err) {
+        console.error('Failed to set active round on upload:', err);
+      }
+      setUploadMessage(`성공적으로 ${uploadRows.length}명의 명단이 업로드되었습니다. (점검자 활성 차수로 지정되었습니다)`);
       setUploadStep(2); // success
       onUploadSuccess();
     } catch(err: any) {
@@ -271,7 +276,7 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
   return (
     <div className="flex flex-col gap-4">
       <div className="bg-white border border-slate-200 rounded-xl text-left shadow-sm" style={{ padding: "8px" }}>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1">
           <label className="text-[13px] font-semibold text-[#8E8E93] ml-1">점검 기간 선택 (차수)</label>
           {availableRounds.length > 0 ? (
             <select 
@@ -289,6 +294,9 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
             <span className="text-xs text-slate-400 font-medium bg-slate-50 px-2 py-1 rounded">명단 없음</span>
           )}
         </div>
+        <p className="text-[11px] text-blue-600 font-semibold mb-2 ml-1">
+          * 여기서 선택한 차수가 모든 점검자 화면에 실시간 고정 적용됩니다.
+        </p>
         <div className="flex items-center gap-2">
           <input 
             type="date"

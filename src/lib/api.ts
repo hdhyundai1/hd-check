@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDocs, query, where, writeBatch, deleteDoc , onSnapshot} from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, getDocs, query, where, writeBatch, deleteDoc, onSnapshot} from 'firebase/firestore';
 import { db } from './firebase';
 import { Worker } from '../types';
 
@@ -231,5 +231,40 @@ export function subscribeWorkersApi(roundId: string, callback: (list: Worker[]) 
     } else {
       console.error("subscribeWorkersApi error", error);
     }
+  });
+}
+
+export async function getActiveRoundApi(): Promise<string | null> {
+  try {
+    const docRef = doc(db, 'settings', 'global');
+    const snap = await getDoc(docRef);
+    if (snap.exists() && snap.data()?.activeRoundId) {
+      return snap.data().activeRoundId;
+    }
+    return null;
+  } catch (error) {
+    console.error("getActiveRoundApi Error:", error);
+    return null;
+  }
+}
+
+export async function setActiveRoundApi(roundId: string): Promise<void> {
+  try {
+    const docRef = doc(db, 'settings', 'global');
+    await setDoc(docRef, { activeRoundId: roundId, updatedAt: new Date().toISOString() }, { merge: true });
+  } catch (error) {
+    console.error("setActiveRoundApi Error:", error);
+    throw error;
+  }
+}
+
+export function subscribeActiveRoundApi(callback: (roundId: string) => void) {
+  const docRef = doc(db, 'settings', 'global');
+  return onSnapshot(docRef, (snap) => {
+    if (snap.exists() && snap.data()?.activeRoundId) {
+      callback(snap.data()?.activeRoundId);
+    }
+  }, (error) => {
+    console.error("subscribeActiveRoundApi Error:", error);
   });
 }
