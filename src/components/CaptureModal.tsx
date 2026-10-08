@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { X, Download, Share2, Copy, Check, Camera, Loader2, FileText, Sparkles, Layers, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Download, Share2, Copy, Check, Camera, Loader2, FileText, Layers, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Worker } from '../types';
 import { renderWorkerListToCanvas } from '../lib/captureRenderer';
 
@@ -290,22 +290,6 @@ export default function CaptureModal({
         {/* Modal Body / Preview */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 bg-slate-100/70 space-y-3.5">
           
-          {/* KakaoTalk Sharing Tip Box */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">
-              <span className="font-bold">업체 전송 꿀팁:</span>
-              <ul className="list-disc pl-4 mt-1 space-y-0.5 text-amber-800">
-                <li>
-                  <strong>PC 카카오톡</strong>: 아래 <strong>[클립보드 복사]</strong> 누른 후 카톡 채팅창에서 <strong>Ctrl + V</strong> 누르면 이미지가 즉시 전송됩니다!
-                </li>
-                <li>
-                  <strong>스마트폰(모바일)</strong>: <strong>[카카오톡 / SNS 공유]</strong>를 누르면 카톡 친구/채팅방을 바로 선택하여 발송할 수 있습니다.
-                </li>
-              </ul>
-            </div>
-          </div>
-
           {/* Page Tabs (if list exceeds PAGE_SIZE) */}
           {isPagingApplicable && (
             <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-2">
