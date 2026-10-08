@@ -157,6 +157,31 @@ export default function App() {
   }, [roundId, userInfo?.role]);
 
   useEffect(() => {
+    // Prevent mobile keyboard from scrolling the document body and pushing the top header/Worker Registry offscreen
+    if (typeof window === 'undefined') return;
+    
+    const lockScroll = () => {
+      if (window.scrollY !== 0) {
+        window.scrollTo(0, 0);
+      }
+    };
+
+    window.addEventListener('scroll', lockScroll, { passive: true });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', lockScroll);
+      window.visualViewport.addEventListener('scroll', lockScroll);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', lockScroll);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', lockScroll);
+        window.visualViewport.removeEventListener('scroll', lockScroll);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const savedInfo = localStorage.getItem('sh_user_info');
     if (savedInfo) {
       try {
@@ -567,6 +592,9 @@ export default function App() {
                 type="text" 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                onFocus={() => {
+                  window.scrollTo({ top: 0, behavior: 'instant' });
+                }}
                 className="w-full bg-[#E5E5EA] pl-10 pr-9 py-2 rounded-full font-bold text-[15px] border-0 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all placeholder:text-slate-400 shadow-inner" 
                 placeholder="이름 / 초성 검색 (예: ㄱㄷㅎ, 홍길동)..." 
               />
