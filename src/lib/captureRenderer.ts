@@ -201,7 +201,7 @@ export function renderWorkerListToCanvas(options: RenderWorkerOptions): HTMLCanv
   const colW = tableWidth / 4;
   const statCols = [
     { label: '점검 대상', value: companyTitle, color: '#0F172A', size: '13px' },
-    { label: '명단 총원', value: `${(totalWorkerCount || 0).toLocaleString()} 명`, color: '#2563EB', size: '15px' },
+    { label: '명단 총원', value: `${((stats.total > 0 ? stats.total : totalWorkerCount) || 0).toLocaleString()} 명`, color: '#2563EB', size: '15px' },
     { label: '업체 미확인 현황', value: `${(stats.no || 0).toLocaleString()} 명`, color: '#DC2626', size: '15px' },
     { 
       label: '점검 완료율', 
@@ -212,18 +212,18 @@ export function renderWorkerListToCanvas(options: RenderWorkerOptions): HTMLCanv
   ];
 
   statCols.forEach((col, idx) => {
-    const colX = tableX + idx * colW + 16;
+    const colCenterX = tableX + idx * colW + colW / 2;
     // Sub-label
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#64748B';
     ctx.font = "500 11px 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-    ctx.fillText(col.label, colX, statsBoxY + 22);
+    ctx.fillText(col.label, colCenterX, statsBoxY + 22);
 
     // Value
     ctx.fillStyle = col.color;
     ctx.font = `bold ${col.size} 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
     const truncatedVal = truncateText(ctx, col.value, colW - 24);
-    ctx.fillText(truncatedVal, colX, statsBoxY + 44);
+    ctx.fillText(truncatedVal, colCenterX, statsBoxY + 44);
 
     // Vertical divider between stats columns (except last)
     if (idx < 3) {
@@ -239,11 +239,11 @@ export function renderWorkerListToCanvas(options: RenderWorkerOptions): HTMLCanv
   const tableTopY = 178;
   const cols = [
     { title: 'No.', width: 48, align: 'center' as const },
-    { title: '성명', width: 112, align: 'left' as const },
-    { title: '생년월일', width: 110, align: 'left' as const },
-    { title: '소속 업체', width: 188, align: 'left' as const },
+    { title: '성명', width: 112, align: 'center' as const },
+    { title: '생년월일', width: 110, align: 'center' as const },
+    { title: '소속 업체', width: 188, align: 'center' as const },
     { title: '출입점검 상태', width: 124, align: 'center' as const },
-    { title: '비고 / 사유', width: 214, align: 'left' as const },
+    { title: '비고 / 사유', width: 214, align: 'center' as const },
   ];
 
   // Header Background
@@ -255,13 +255,8 @@ export function renderWorkerListToCanvas(options: RenderWorkerOptions): HTMLCanv
   ctx.textBaseline = 'middle';
 
   cols.forEach((col, idx) => {
-    if (col.align === 'center') {
-      ctx.textAlign = 'center';
-      ctx.fillText(col.title, curX + col.width / 2, tableTopY + 18);
-    } else {
-      ctx.textAlign = 'left';
-      ctx.fillText(col.title, curX + 12, tableTopY + 18);
-    }
+    ctx.textAlign = 'center';
+    ctx.fillText(col.title, curX + col.width / 2, tableTopY + 18);
 
     // Column divider line in header
     if (idx < cols.length - 1) {
@@ -309,26 +304,26 @@ export function renderWorkerListToCanvas(options: RenderWorkerOptions): HTMLCanv
     cellX += cols[0].width;
 
     // Col 1: 성명
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#0F172A';
     ctx.font = "bold 13px 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     const displayName = worker.name || '-';
-    ctx.fillText(truncateText(ctx, displayName, cols[1].width - 16), cellX + 12, rowY + rowHeight / 2);
+    ctx.fillText(truncateText(ctx, displayName, cols[1].width - 16), cellX + cols[1].width / 2, rowY + rowHeight / 2);
     cellX += cols[1].width;
 
     // Col 2: 생년월일
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#475569';
     ctx.font = "500 12px 'Pretendard', -apple-system, BlinkMacSystemFont, monospace";
-    ctx.fillText(worker.dob || '-', cellX + 12, rowY + rowHeight / 2);
+    ctx.fillText(worker.dob || '-', cellX + cols[2].width / 2, rowY + rowHeight / 2);
     cellX += cols[2].width;
 
     // Col 3: 소속 업체
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     ctx.fillStyle = '#334155';
     ctx.font = "500 12px 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
     const compText = truncateText(ctx, worker.company || '-', cols[3].width - 16);
-    ctx.fillText(compText, cellX + 12, rowY + rowHeight / 2);
+    ctx.fillText(compText, cellX + cols[3].width / 2, rowY + rowHeight / 2);
     cellX += cols[3].width;
 
     // Col 4: 출입점검 상태 Badge
@@ -346,15 +341,15 @@ export function renderWorkerListToCanvas(options: RenderWorkerOptions): HTMLCanv
     cellX += cols[4].width;
 
     // Col 5: 비고 / 사유
-    ctx.textAlign = 'left';
+    ctx.textAlign = 'center';
     ctx.font = "500 11px 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
     if (isPending) {
       ctx.fillStyle = '#EF4444';
-      ctx.fillText(truncateText(ctx, worker.remark || '출입 점검 필요', cols[5].width - 16), cellX + 12, rowY + rowHeight / 2);
+      ctx.fillText(truncateText(ctx, worker.remark || '출입 점검 필요', cols[5].width - 16), cellX + cols[5].width / 2, rowY + rowHeight / 2);
     } else {
       ctx.fillStyle = '#64748B';
-      ctx.fillText(truncateText(ctx, worker.remark || '-', cols[5].width - 16), cellX + 12, rowY + rowHeight / 2);
+      ctx.fillText(truncateText(ctx, worker.remark || '-', cols[5].width - 16), cellX + cols[5].width / 2, rowY + rowHeight / 2);
     }
   });
 

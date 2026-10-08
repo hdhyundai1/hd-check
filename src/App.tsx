@@ -403,8 +403,8 @@ export default function App() {
       </header>
 
       <div className="flex-1 flex flex-col overflow-hidden w-full">
-        <div className="pr-4 md:p-6 shrink-0 bg-[#F2F2F7] z-10 overflow-y-auto max-h-[50vh]" style={{ paddingLeft: "16px", paddingTop: "5px", paddingBottom: "5px", height: "225.5px" }}>
-          <div className="w-full max-w-5xl mx-auto flex flex-col gap-4">
+        <div className="p-4 md:p-6 pb-2 shrink-0 bg-[#F2F2F7] z-10">
+          <div className="w-full max-w-5xl mx-auto flex flex-col gap-3">
           <div className="grid grid-cols-2 gap-2">
             {String(userInfo?.role).toUpperCase() === 'ADMIN' ? (
               <div className="space-y-1 relative">
@@ -500,38 +500,26 @@ export default function App() {
               </div>
             </div>
           </div>
-
-          <div className="space-y-1" style={{ height: "66.5px", paddingTop: "-3px", marginTop: "-16px" }}>
-            <label className="text-[10px] font-bold text-slate-500 ml-1">SEARCH OPERATOR</label>
-            <div className="relative">
-              <input 
-                type="text" 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-[#e3e3e8] pl-9 pr-3 py-2.5 rounded-[10px] font-medium text-[15px] border-0 outline-none focus:ring-2 focus:ring-blue-500 transition-colors placeholder:text-slate-400" style={{ height: "37px" }} 
-                placeholder="이름 / 초성 검색..." 
-              />
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8e8e93] w-4 h-4 ml-1" />
-            </div>
-          </div>
           </div>
         </div>
 
-        <main className="flex-1 flex flex-col overflow-hidden bg-[#F2F2F7]">
-          <div className="flex-1 overflow-hidden flex flex-col gap-4" style={{ paddingTop: "4px", height: "394.5px" }}>
-            <div className="w-full max-w-5xl mx-auto flex justify-between items-center px-4 md:px-6 shrink-0 mt-4">
+        <main className="flex-1 flex flex-col overflow-hidden bg-[#F2F2F7] min-h-0">
+          <div className="flex-1 overflow-hidden flex flex-col gap-2 min-h-0">
+            <div className="w-full max-w-5xl mx-auto flex justify-between items-center px-4 md:px-6 shrink-0 mt-2">
               <div className="flex items-center gap-2.5">
                 <h2 className="text-xs font-black text-slate-400 tracking-widest uppercase">
                   Worker Registry
                 </h2>
-                <button
-                  onClick={handleTriggerCapture}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-[11px] shadow-sm transition-all cursor-pointer"
-                  title="현재 화면 및 스크롤 하단 전체 명단 캡쳐 후 카톡/SNS 전송"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  <span>캡쳐 보내기</span>
-                </button>
+                {currentTab === 'un' && (
+                  <button
+                    onClick={handleTriggerCapture}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-[11px] shadow-sm transition-all cursor-pointer animate-in fade-in"
+                    title="미확인 명단 캡쳐 후 카톡/SNS 전송"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>캡쳐 보내기</span>
+                  </button>
+                )}
               </div>
               <div className="flex gap-4 text-[10px] font-bold uppercase">
                 <span className="flex items-center gap-1 text-slate-500">● Total {(stats.total || 0).toLocaleString()}</span>
@@ -540,7 +528,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="bg-white md:rounded-[20px] shadow-sm flex-1 flex flex-col overflow-hidden min-h-0 mb-0 md:mb-4 border-t md:border-x border-gray-100">
+            <div className="bg-white md:rounded-[20px] shadow-sm flex-1 flex flex-col overflow-hidden min-h-0 mb-0 md:mb-2 border-t md:border-x border-gray-100">
               <div className="hidden md:flex justify-center bg-white border-b border-gray-100 px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-wider shrink-0" style={{ height: "48.5px" }}>
                 <div className="flex justify-between items-center w-full max-w-5xl">
                   <div>Worker Name & DOB</div>
@@ -548,7 +536,7 @@ export default function App() {
                 </div>
               </div>
               
-              <div className="flex-1 overflow-hidden w-full relative">
+              <div className="flex-1 overflow-hidden w-full relative min-h-0">
                 <Virtuoso
                   style={{ height: '100%', width: '100%' }}
                   data={filteredList}
@@ -574,18 +562,40 @@ export default function App() {
                   </div>
                 )}
               </div>
-              
-              <div className="bg-slate-900 p-3 flex justify-between items-center text-[10px] text-slate-400 font-black tracking-widest px-4 md:px-6 shrink-0">
-                 <div>SYSTEM STATUS: READY</div>
-                 <div className="hidden md:flex gap-4">
-                   <span>LATENCY: 24ms</span>
-                   <span>ENCRYPTION: AES-256</span>
-                   <span className="text-blue-400">OPERATING AT PEAK EFFICIENCY</span>
-                 </div>
-              </div>
             </div>
           </div>
         </main>
+
+        {/* Fixed Bottom SEARCH OPERATOR for Easy One-Handed Thumb Access */}
+        <div className="shrink-0 bg-white border-t border-slate-200/90 px-4 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] z-20">
+          <div className="w-full max-w-5xl mx-auto flex items-center gap-2.5">
+            <div className="relative flex-1">
+              <input 
+                type="text" 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-[#E5E5EA] pl-10 pr-9 py-2 rounded-full font-bold text-[15px] border-0 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all placeholder:text-slate-400 shadow-inner" 
+                placeholder="이름 / 초성 검색 (예: ㄱㄷㅎ, 홍길동)..." 
+              />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4 pointer-events-none" />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-slate-300 hover:bg-slate-400 text-white flex items-center justify-center text-xs cursor-pointer transition-colors"
+                  title="검색어 지우기"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            {search && (
+              <span className="text-[11px] font-black text-blue-600 shrink-0 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+                {filteredList.length}명
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       <ReasonModal 

@@ -87,7 +87,7 @@ export default function CaptureModal({
 
       const canvas = renderWorkerListToCanvas({
         workers: currentWorkersSlice.workers,
-        totalWorkerCount: workerList.length,
+        totalWorkerCount: stats.total > 0 ? stats.total : workerList.length,
         startIndex: currentWorkersSlice.startIndex,
         roundLabel,
         companyTitle,
@@ -207,7 +207,7 @@ export default function CaptureModal({
         const end = Math.min(start + PAGE_SIZE, workerList.length);
         const pageCanvas = renderWorkerListToCanvas({
           workers: workerList.slice(start, end),
-          totalWorkerCount: workerList.length,
+          totalWorkerCount: stats.total > 0 ? stats.total : workerList.length,
           startIndex: start,
           roundLabel,
           companyTitle,
@@ -270,8 +270,11 @@ export default function CaptureModal({
             <div>
               <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
                 명단 캡쳐 & 카톡/SNS 발송
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-                  총 {(workerList.length || 0).toLocaleString()}명
+                <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                  미확인 {(stats.no || workerList.length || 0).toLocaleString()}명
+                </span>
+                <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                  총원 {(stats.total || 0).toLocaleString()}명
                 </span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">

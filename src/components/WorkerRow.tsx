@@ -31,8 +31,19 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
     }
   }, [confirmState, setActiveConfirmId]);
 
+  const triggerHaptic = (pattern: number | number[]) => {
+    try {
+      if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate(pattern);
+      }
+    } catch (_) {
+      // Ignore vibration error on unsupported platforms
+    }
+  };
+
   const handleNormalAttendance = (e: React.MouseEvent) => {
     e.stopPropagation();
+    triggerHaptic(50);
     if (!confirmState) {
       setActiveConfirmId?.(itemId);
     }
@@ -40,6 +51,7 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
 
   const confirmNormalAttendance = (e: React.MouseEvent) => {
     e.stopPropagation();
+    triggerHaptic([60, 40, 80]);
     setActiveConfirmId?.(null);
     onSave(itemId, '확인', '');
   };
@@ -49,7 +61,7 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
       ref={ref}
       className={cn(
         "px-5 py-3.5 border-b border-gray-100/80 active:bg-gray-100 transition-colors",
-        confirmState ? "bg-amber-100" : (
+        confirmState ? "bg-amber-300 border-b border-amber-400" : (
           item.status?.trim() === '확인' ? "bg-blue-50/30" : (item.status && item.status.trim() !== '확인' ? "bg-red-50/20" : "")
         )
       )}
@@ -64,8 +76,10 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
         </span>
         <div className="flex items-center gap-2 shrink-0">
           <span className={cn(
-            "text-[13px] shrink-0 transition-colors",
-            confirmState ? "text-red-600 font-bold" : "text-[#8E8E93]"
+            "shrink-0 transition-all",
+            confirmState 
+              ? "text-[15px] text-red-600 font-bold" 
+              : "text-[13px] text-[#8E8E93]"
           )}>
             {item.dob}
           </span>
