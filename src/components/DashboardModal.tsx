@@ -170,19 +170,19 @@ export default function DashboardModal({ workerList: initialWorkerList, roundId:
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col items-center text-center" style={{ height: "80px", paddingTop: "10px", paddingBottom: "10px" }}>
               <span className="text-[11px] font-black tracking-widest text-slate-400 mb-1">총 인원</span>
-              <span className="text-3xl font-black text-slate-800">{stats.total}</span>
+              <span className="text-3xl font-black text-slate-800">{(stats.total || 0).toLocaleString()}</span>
             </div>
             <div className="bg-blue-500 p-5 rounded-2xl shadow-sm flex flex-col items-center text-center" style={{ height: "80px", paddingTop: "10px", paddingBottom: "10px" }}>
               <span className="text-[11px] font-black tracking-widest text-blue-200 mb-1">점검 인원</span>
-              <span className="text-3xl font-black text-white">{stats.processedCount}</span>
+              <span className="text-3xl font-black text-white">{(stats.processedCount || 0).toLocaleString()}</span>
             </div>
             <div className="bg-emerald-500 p-5 rounded-2xl shadow-sm flex flex-col items-center text-center" style={{ height: "80px", paddingTop: "10px", paddingBottom: "10px" }}>
               <span className="text-[11px] font-black tracking-widest text-emerald-200 mb-1">확인 인원</span>
-              <span className="text-3xl font-black text-white">{stats.confirmCount}</span>
+              <span className="text-3xl font-black text-white">{(stats.confirmCount || 0).toLocaleString()}</span>
             </div>
             <div className="bg-red-500 p-5 rounded-2xl shadow-sm flex flex-col items-center text-center" style={{ height: "80px", paddingTop: "10px", paddingBottom: "10px" }}>
               <span className="text-[11px] font-black tracking-widest text-red-200 mb-1">부재중 인원</span>
-              <span className="text-3xl font-black text-white">{stats.absentCount}</span>
+              <span className="text-3xl font-black text-white">{(stats.absentCount || 0).toLocaleString()}</span>
             </div>
           </div>
 
@@ -194,11 +194,11 @@ export default function DashboardModal({ workerList: initialWorkerList, roundId:
             <div className="space-y-4">
               <div className="flex justify-between items-center pb-3 border-b border-slate-100">
                 <span className="text-[13px] font-semibold text-slate-500">참여 점검자 수</span>
-                <span className="text-[15px] font-bold text-slate-800">{stats.checkerCount} 명</span>
+                <span className="text-[15px] font-bold text-slate-800">{(stats.checkerCount || 0).toLocaleString()} 명</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-[13px] font-semibold text-slate-500">점검자 1인당 평균 확인</span>
-                <span className="text-[15px] font-bold text-slate-800">{stats.avgConfirmPerChecker} 명</span>
+                <span className="text-[15px] font-bold text-slate-800">{(stats.avgConfirmPerChecker || 0).toLocaleString()} 명</span>
               </div>
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function DashboardModal({ workerList: initialWorkerList, roundId:
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-5 flex flex-col" style={{ marginLeft: "0px", marginTop: "6px", marginBottom: "7px", minHeight: "145px", maxHeight: "400px", paddingTop: "10px", paddingBottom: "10px" }}>
             <h3 className="text-sm font-bold text-slate-800 mb-2 shrink-0 flex items-center gap-2">
               <UserX className="w-4 h-4 text-red-500" />
-              부재중 사유 상세 ({stats.absentCount}명)
+              부재중 사유 상세 ({(stats.absentCount || 0).toLocaleString()}명)
             </h3>
             
             {Object.keys(stats.reasonCounts).length > 0 ? (
@@ -219,7 +219,7 @@ export default function DashboardModal({ workerList: initialWorkerList, roundId:
                       <div key={reason} className="group">
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-[13px] font-bold text-slate-700">{reason}</span>
-                          <span className="text-[13px] font-bold text-slate-500">{count}명 <span className="text-slate-400 font-medium text-[11px]">({percentage}%)</span></span>
+                          <span className="text-[13px] font-bold text-slate-500">{(Number(count) || 0).toLocaleString()}명 <span className="text-slate-400 font-medium text-[11px]">({percentage}%)</span></span>
                         </div>
                         <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                           <div 

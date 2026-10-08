@@ -187,7 +187,7 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
       } catch (err) {
         console.error('Failed to set active round on upload:', err);
       }
-      setUploadMessage(`성공적으로 ${uploadRows.length}명의 명단이 업로드되었습니다. (점검자 활성 차수로 지정되었습니다)`);
+      setUploadMessage(`성공적으로 ${(uploadRows.length || 0).toLocaleString()}명의 명단이 업로드되었습니다. (점검자 활성 차수로 지정되었습니다)`);
       setUploadStep(2); // success
       onUploadSuccess();
     } catch(err: any) {
@@ -445,7 +445,7 @@ export default function AdminPanel({ onUploadSuccess, workerList, roundId, setRo
                 <h3 className="text-lg font-bold text-[20px] text-[#1C1C1E] tracking-tight mb-2">명단 업로드 확인</h3>
                 <p className="text-sm font-medium text-[15px] text-[#8E8E93] mb-6 leading-relaxed">
                   [{roundId.replace('_', ' ~ ')}] 기간의 기존 명단을 삭제하고<br/>
-                  <span className="text-blue-600">신규 {uploadRows.length}명</span>으로 덮어씁니다.<br/>
+                  <span className="text-blue-600">신규 {(uploadRows.length || 0).toLocaleString()}명</span>으로 덮어씁니다.<br/>
                   진행하시겠습니까?
                 </p>
                 {isUploading && (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { RefreshCw, LogOut, ChevronDown, Search, Loader2, Power, Zap, Settings, X, BarChart3 } from 'lucide-react';
+import { RefreshCw, LogOut, ChevronDown, Search, Loader2, Power, Zap, Settings, X, BarChart3, Camera } from 'lucide-react';
 import { UserInfo, Worker } from './types';
 import { loginApi, saveStatusApi, fetchWorkersApi, fetchAvailableRoundsApi, subscribeWorkersApi, getActiveRoundApi, setActiveRoundApi, subscribeActiveRoundApi } from './lib/api';
 import { getChosung, cn } from './lib/utils';
@@ -8,6 +8,7 @@ import AdminPanel from './components/AdminPanel';
 import DashboardModal from './components/DashboardModal';
 import WorkerRow from './components/WorkerRow';
 import ReasonModal from './components/ReasonModal';
+import CaptureModal from './components/CaptureModal';
 import { AnimatePresence } from 'motion/react';
 import { Virtuoso } from 'react-virtuoso';
 
@@ -136,6 +137,15 @@ export default function App() {
   const [modalWorker, setModalWorker] = useState<Worker | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [isCaptureModalOpen, setIsCaptureModalOpen] = useState(false);
+
+  const handleTriggerCapture = () => {
+    if (filteredList.length === 0) {
+      alert('현재 조건(업체/탭/검색)에 해당하는 명단이 없습니다.');
+      return;
+    }
+    setIsCaptureModalOpen(true);
+  };
 
   useEffect(() => {
     if (userInfo?.role && roundId) {
@@ -459,7 +469,7 @@ export default function App() {
               style={{ height: "75px" }}
             >
               <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-1">전체확인</p>
-              <p className="text-xl md:text-2xl font-black tracking-tighter">{stats.total} <span className="text-[10px] md:text-sm font-medium text-slate-400">명</span></p>
+              <p className="text-xl md:text-2xl font-black tracking-tighter">{(stats.total || 0).toLocaleString()} <span className="text-[10px] md:text-sm font-medium text-slate-400">명</span></p>
             </div>
             <div 
               onClick={() => setCurrentTab('un')}
@@ -470,7 +480,7 @@ export default function App() {
               style={{ height: "75px" }}
             >
               <p className="text-[10px] md:text-xs font-bold text-red-600 mb-1">미확인</p>
-              <p className="text-xl md:text-2xl font-black tracking-tighter text-red-700">{stats.no} <span className="text-[10px] md:text-sm font-medium text-red-400">명</span></p>
+              <p className="text-xl md:text-2xl font-black tracking-tighter text-red-700">{(stats.no || 0).toLocaleString()} <span className="text-[10px] md:text-sm font-medium text-red-400">명</span></p>
             </div>
             <div 
               onClick={() => setCurrentTab('ok')}
@@ -481,7 +491,7 @@ export default function App() {
               style={{ height: "75px" }}
             >
               <p className="text-[10px] md:text-xs font-bold text-blue-600 mb-1">확인</p>
-              <p className="text-xl md:text-2xl font-black tracking-tighter text-blue-700">{stats.ok} <span className="text-[10px] md:text-sm font-medium text-blue-400">명</span></p>
+              <p className="text-xl md:text-2xl font-black tracking-tighter text-blue-700">{(stats.ok || 0).toLocaleString()} <span className="text-[10px] md:text-sm font-medium text-blue-400">명</span></p>
               <div className="w-full bg-blue-200 h-1 md:h-1.5 mt-1 md:mt-2 rounded-full overflow-hidden">
                 <div 
                   className="bg-blue-600 h-full transition-all duration-500" 
@@ -510,13 +520,23 @@ export default function App() {
         <main className="flex-1 flex flex-col overflow-hidden bg-[#F2F2F7]">
           <div className="flex-1 overflow-hidden flex flex-col gap-4" style={{ paddingTop: "4px", height: "394.5px" }}>
             <div className="w-full max-w-5xl mx-auto flex justify-between items-center px-4 md:px-6 shrink-0 mt-4">
-              <h2 className="text-xs font-black text-slate-400 tracking-widest uppercase">
-                Worker Registry
-              </h2>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-xs font-black text-slate-400 tracking-widest uppercase">
+                  Worker Registry
+                </h2>
+                <button
+                  onClick={handleTriggerCapture}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-[11px] shadow-sm transition-all cursor-pointer"
+                  title="현재 화면 및 스크롤 하단 전체 명단 캡쳐 후 카톡/SNS 전송"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>캡쳐 보내기</span>
+                </button>
+              </div>
               <div className="flex gap-4 text-[10px] font-bold uppercase">
-                <span className="flex items-center gap-1 text-slate-500">● Total {stats.total}</span>
-                <span className="hidden md:flex items-center gap-1 text-blue-500">● Normal {stats.ok}</span>
-                <span className="hidden md:flex items-center gap-1 text-red-500">● Pending {stats.no}</span>
+                <span className="flex items-center gap-1 text-slate-500">● Total {(stats.total || 0).toLocaleString()}</span>
+                <span className="hidden md:flex items-center gap-1 text-blue-500">● Normal {(stats.ok || 0).toLocaleString()}</span>
+                <span className="hidden md:flex items-center gap-1 text-red-500">● Pending {(stats.no || 0).toLocaleString()}</span>
               </div>
             </div>
 
@@ -572,6 +592,17 @@ export default function App() {
         worker={modalWorker} 
         onClose={() => setModalWorker(null)} 
         onSave={handleSave} 
+      />
+
+      <CaptureModal 
+        isOpen={isCaptureModalOpen}
+        onClose={() => setIsCaptureModalOpen(false)}
+        workerList={filteredList}
+        roundLabel={roundOptions.find(opt => opt.id === roundId)?.label || (roundId ? roundId.replace('_', ' ~ ') : '점검 차수')}
+        currentComp={currentComp}
+        currentTab={currentTab}
+        stats={stats}
+        checkerName={userInfo?.name || ''}
       />
 
       

@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "HD현대삼호 현장 출입점검 관리시스템",
+  "description": "HD현대삼호 협력사 작업자 현장 출입점검 및 미확인 명단 관리 시스템",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
