@@ -529,13 +529,6 @@ export default function App() {
             </div>
 
             <div className="bg-white md:rounded-[20px] shadow-sm flex-1 flex flex-col overflow-hidden min-h-0 mb-0 md:mb-2 border-t md:border-x border-gray-100">
-              <div className="hidden md:flex justify-center bg-white border-b border-gray-100 px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-wider shrink-0" style={{ height: "48.5px" }}>
-                <div className="flex justify-between items-center w-full max-w-5xl">
-                  <div>Worker Name & DOB</div>
-                  <div className="w-[140px] text-right">Actions</div>
-                </div>
-              </div>
-              
               <div className="flex-1 overflow-hidden w-full relative min-h-0">
                 <Virtuoso
                   style={{ height: '100%', width: '100%' }}
