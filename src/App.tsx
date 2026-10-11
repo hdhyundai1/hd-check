@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { RefreshCw, LogOut, ChevronDown, Search, Loader2, Power, Zap, Settings, X, BarChart3, Camera } from 'lucide-react';
 import { UserInfo, Worker } from './types';
 import { loginApi, saveStatusApi, fetchWorkersApi, fetchAvailableRoundsApi, subscribeWorkersApi, getActiveRoundApi, setActiveRoundApi, subscribeActiveRoundApi } from './lib/api';
-import { getChosung, cn } from './lib/utils';
+import { getChosung, cn, triggerHaptic } from './lib/utils';
 import Login from './components/Login';
 import AdminPanel from './components/AdminPanel';
 import DashboardModal from './components/DashboardModal';
@@ -486,9 +486,12 @@ export default function App() {
 
           <div className="grid grid-cols-3 gap-2 md:gap-3">
             <div 
-              onClick={() => setCurrentTab('all')}
+              onClick={() => {
+                triggerHaptic(20);
+                setCurrentTab('all');
+              }}
               className={cn(
-                "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm",
+                "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm active:scale-[0.98]",
                 currentTab === 'all' ? "bg-white ring-2 ring-blue-500" : "bg-white/60 hover:bg-white"
               )}
               style={{ height: "75px" }}
@@ -497,9 +500,12 @@ export default function App() {
               <p className="text-xl md:text-2xl font-black tracking-tighter">{(stats.total || 0).toLocaleString()} <span className="text-[10px] md:text-sm font-medium text-slate-400">명</span></p>
             </div>
             <div 
-              onClick={() => setCurrentTab('un')}
+              onClick={() => {
+                triggerHaptic(20);
+                setCurrentTab('un');
+              }}
               className={cn(
-                "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm",
+                "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm active:scale-[0.98]",
                 currentTab === 'un' ? "bg-white ring-2 ring-red-500" : "bg-white/60 hover:bg-white"
               )}
               style={{ height: "75px" }}
@@ -508,9 +514,12 @@ export default function App() {
               <p className="text-xl md:text-2xl font-black tracking-tighter text-red-700">{(stats.no || 0).toLocaleString()} <span className="text-[10px] md:text-sm font-medium text-red-400">명</span></p>
             </div>
             <div 
-              onClick={() => setCurrentTab('ok')}
+              onClick={() => {
+                triggerHaptic(20);
+                setCurrentTab('ok');
+              }}
               className={cn(
-                "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm",
+                "p-3 md:p-4 rounded-[14px] flex flex-col justify-center cursor-pointer transition-all shadow-sm active:scale-[0.98]",
                 currentTab === 'ok' ? "bg-white ring-2 ring-blue-500" : "bg-white/60 hover:bg-white"
               )}
               style={{ height: "75px" }}
