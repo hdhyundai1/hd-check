@@ -67,16 +67,21 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
       )}
     >
       <div className="flex w-full max-w-5xl mx-auto justify-between items-center gap-3">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className={cn(
+          "flex items-center gap-2 min-w-0 flex-1 transition-all duration-200",
+          confirmState && "translate-x-1"
+        )}>
         <span className={cn(
-          "text-[17px] font-semibold truncate",
-          isTarget ? "text-[#007AFF]" : "text-[#1C1C1E]"
+          "font-semibold whitespace-nowrap shrink-0 transition-all duration-200",
+          confirmState 
+            ? "text-[19px] font-bold text-gray-950" 
+            : (isTarget ? "text-[17px] text-[#007AFF]" : "text-[17px] text-[#1C1C1E]")
         )}>
           {item.name}
         </span>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <span className={cn(
-            "shrink-0 transition-all",
+            "shrink-0 transition-all duration-200",
             confirmState 
               ? "text-[15px] text-red-600 font-bold" 
               : "text-[13px] text-[#8E8E93]"
