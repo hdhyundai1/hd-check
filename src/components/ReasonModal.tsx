@@ -37,7 +37,18 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
 
   if (!worker) return null;
 
+  const triggerHaptic = (pattern: number | number[] = 50) => {
+    try {
+      if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate(pattern);
+      }
+    } catch (_) {
+      // Ignore vibration error on unsupported platforms
+    }
+  };
+
   const handleReasonSelect = (cat: string) => {
+    triggerHaptic(45);
     setSelectedCategory(cat);
     setReasonText('');
     setStartDate('');
@@ -129,16 +140,24 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
             <input 
               type="date"
               value={startDate}
-              
-              onChange={e => setStartDate(e.target.value)}
+              onClick={() => triggerHaptic(40)}
+              onFocus={() => triggerHaptic(40)}
+              onChange={e => {
+                triggerHaptic(30);
+                setStartDate(e.target.value);
+              }}
               className="flex-1 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-slate-800 bg-slate-50 transition"
             />
             <span className="font-black text-slate-400">~</span>
             <input 
               type="date"
               value={endDate}
-              
-              onChange={e => setEndDate(e.target.value)}
+              onClick={() => triggerHaptic(40)}
+              onFocus={() => triggerHaptic(40)}
+              onChange={e => {
+                triggerHaptic(30);
+                setEndDate(e.target.value);
+              }}
               className="flex-1 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-slate-800 bg-slate-50 transition"
             />
           </div>
@@ -149,8 +168,12 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
             <input 
               type="date"
               value={singleDate}
-              
-              onChange={e => setSingleDate(e.target.value)}
+              onClick={() => triggerHaptic(40)}
+              onFocus={() => triggerHaptic(40)}
+              onChange={e => {
+                triggerHaptic(30);
+                setSingleDate(e.target.value);
+              }}
               className="w-full border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-slate-800 bg-slate-50 transition"
             />
           </div>
@@ -169,16 +192,24 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
               <input 
                 type="date"
                 value={startDate}
-                
-                onChange={e => setStartDate(e.target.value)}
+                onClick={() => triggerHaptic(40)}
+                onFocus={() => triggerHaptic(40)}
+                onChange={e => {
+                  triggerHaptic(30);
+                  setStartDate(e.target.value);
+                }}
                 className="flex-1 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-slate-800 bg-slate-50 transition"
               />
               <span className="font-black text-slate-400">~</span>
               <input 
                 type="date"
                 value={endDate}
-                
-                onChange={e => setEndDate(e.target.value)}
+                onClick={() => triggerHaptic(40)}
+                onFocus={() => triggerHaptic(40)}
+                onChange={e => {
+                  triggerHaptic(30);
+                  setEndDate(e.target.value);
+                }}
                 className="flex-1 border border-slate-200 p-3 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-slate-800 bg-slate-50 transition"
               />
             </div>
@@ -187,7 +218,10 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
         
         <div className="flex flex-col gap-2">
           <button 
-            onClick={handleCommitReason} 
+            onClick={() => {
+              triggerHaptic(60);
+              handleCommitReason();
+            }} 
             className="w-full py-4 rounded-xl font-extrabold text-white bg-[#007AFF] hover:bg-[#0056b3] active:scale-95 text-white font-semibold transition text-sm"
           >
             저장하기 (부재중 처리)
@@ -197,6 +231,7 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
             <div className="flex gap-2 w-full">
               <button 
                 onClick={() => {
+                  triggerHaptic(50);
                   onSave(worker.id || worker.rowIndex, '확인', '');
                   onClose();
                 }} 
@@ -206,6 +241,7 @@ export default function ReasonModal({ worker, onClose, onSave }: ReasonModalProp
               </button>
               <button 
                 onClick={() => {
+                  triggerHaptic(50);
                   onSave(worker.id || worker.rowIndex, '', '');
                   onClose();
                 }} 

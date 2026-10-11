@@ -122,7 +122,10 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
               )}
             </div>
             <button 
-              onClick={() => onOpenModal(item)} 
+              onClick={() => {
+                triggerHaptic(50);
+                onOpenModal(item);
+              }} 
               className="bg-[#FF3B30]/10 text-[#FF3B30] font-semibold text-[13px] px-4 py-1.5 rounded-full active:opacity-70 transition-all shrink-0"
             >
               부재중
@@ -130,7 +133,10 @@ export default function WorkerRow({ item, currentTab, showCompany, onSave, onOpe
           </>
         ) : (
           <button 
-            onClick={() => onOpenModal(item)} 
+            onClick={() => {
+              triggerHaptic(40);
+              onOpenModal(item);
+            }} 
             className="bg-gray-100 text-gray-700 font-medium text-[13px] px-4 py-1.5 rounded-full active:opacity-70 transition-all shrink-0"
           >
             수정
